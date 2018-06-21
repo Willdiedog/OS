@@ -417,20 +417,20 @@ PKTHREAD KiSwappingThread;
 
 //
 // KiProcessListHead - This is the list of processes that have active threads.
-//
+// 具有活动线程的进程的列表
 
 LIST_ENTRY KiProcessListHead;
 
 //
 // KiProcessInSwapListHead - This is the list of processes that are waiting
-//      to be inswapped.
+//      to be inswapped. 要唤入内存的进程列表
 //
 
 SINGLE_LIST_ENTRY KiProcessInSwapListHead;
 
 //
 // KiProcessOutSwapListHead - This is the list of processes that are waiting
-//      to be outswapped.
+//      to be outswapped.  要唤出内存的进程列表
 //
 
 SINGLE_LIST_ENTRY KiProcessOutSwapListHead;

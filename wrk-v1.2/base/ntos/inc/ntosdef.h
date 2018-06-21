@@ -587,7 +587,7 @@ typedef struct _DISPATCHER_HEADER {
     };
 
     LONG SignalState;
-    LIST_ENTRY WaitListHead;
+    LIST_ENTRY WaitListHead;  // µÈ´ýÁÐ±í
 } DISPATCHER_HEADER;
 
 //

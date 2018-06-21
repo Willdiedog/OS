@@ -451,7 +451,7 @@ typedef enum _KWAIT_REASON {
 // Miscellaneous type definitions
 //
 // APC state
-//
+// Asynchronous Procedure Call 异步程序调用
 // N.B. The user APC pending field must be the last member of this structure.
 //
 
@@ -502,7 +502,7 @@ typedef struct _KWAIT_BLOCK {
 
 #endif
 
-} KWAIT_BLOCK, *PKWAIT_BLOCK, *PRKWAIT_BLOCK;
+} KWAIT_BLOCK, *PKWAIT_BLOCK, *PRKWAIT_BLOCK;  // 指明哪个线程在等待哪个分发器对象
 
 // end_ntddk end_wdm end_nthal end_ntifs end_ntosp
 
@@ -948,50 +948,50 @@ typedef struct _KPROCESS {
     // referenced.
     //
 
-    DISPATCHER_HEADER Header;
-    LIST_ENTRY ProfileListHead;
+    DISPATCHER_HEADER Header; // 分发器对象
+    LIST_ENTRY ProfileListHead;  // 进程性能分析
 
     //
     // The following fields are referenced during context switches.
     //
 
-    ULONG_PTR DirectoryTableBase[2];
+    ULONG_PTR DirectoryTableBase[2];  // 进程的页目录表地址数组 
 
-#if defined(_X86_)
+#if defined(_X86_)  // Intel
 
-    KGDTENTRY LdtDescriptor;
-    KIDTENTRY Int21Descriptor;
-    USHORT IopmOffset;
-    UCHAR Iopl;
+	KGDTENTRY LdtDescriptor;   // LDT :  局部描述表
+    KIDTENTRY Int21Descriptor;  // 为了兼容DOS程序  通过int 21h调用DOS系统功能
+    USHORT IopmOffset;	// IO 权限表  I/O Privilege Map
+    UCHAR Iopl;	// IO优先级
     BOOLEAN Unused;
 
 #endif
 
-#if defined(_AMD64_)
+#if defined(_AMD64_) // AMD
 
     USHORT IopmOffset;
 
 #endif
 
-    volatile KAFFINITY ActiveProcessors;
+    volatile KAFFINITY ActiveProcessors;  // 当前运行的处理器
 
     //
     // The following fields are referenced during clock interrupts.
     //
 
-    ULONG KernelTime;
-    ULONG UserTime;
+    ULONG KernelTime;  // 内核模式运行时间
+    ULONG UserTime;	// 用户模式运行时间
 
     //
     // The following fields are referenced infrequently.
     //
 
-    LIST_ENTRY ReadyListHead;
-    SINGLE_LIST_ENTRY SwapListEntry;
+    LIST_ENTRY ReadyListHead; // 就绪状态，但未加入全局就绪链表的线程
+    SINGLE_LIST_ENTRY SwapListEntry;  // 用于进程换入唤出内存
 
 #if defined(_X86_)
 
-    PVOID VdmTrapcHandler;
+    PVOID VdmTrapcHandler; /// Virtual Dos Machine 
 
 #else
 
@@ -999,19 +999,19 @@ typedef struct _KPROCESS {
 
 #endif
 
-    LIST_ENTRY ThreadListHead;
-    KSPIN_LOCK ProcessLock;
-    KAFFINITY Affinity;
+    LIST_ENTRY ThreadListHead;  // 线程列表
+    KSPIN_LOCK ProcessLock;	// 自旋锁 spin lock 
+    KAFFINITY Affinity;  // 该进程的线程在那些处理器上运行  多核 位标记
 
     //
     // N.B. The following bit number definitions must match the following
     //      bit field.
     //
     // N.B. These bits can only be written with interlocked operations.
-    //
+    //  
 
-#define KPROCESS_AUTO_ALIGNMENT_BIT 0
-#define KPROCESS_DISABLE_BOOST_BIT 1
+#define KPROCESS_AUTO_ALIGNMENT_BIT 0   // 进程的内存访问对齐设置 
+#define KPROCESS_DISABLE_BOOST_BIT 1    // 线程优先级提升和时限
 #define KPROCESS_DISABLE_QUANTUM_BIT 2
 
     union {
@@ -1025,16 +1025,16 @@ typedef struct _KPROCESS {
         LONG ProcessFlags;
     };
 
-    SCHAR BasePriority;
-    SCHAR QuantumReset;
-    UCHAR State;
-    UCHAR ThreadSeed;
-    UCHAR PowerState;
-    UCHAR IdealNode;
+    SCHAR BasePriority;  // 指定线程的基本优先级
+    SCHAR QuantumReset;  // 指定线程基本时限重置值  =6
+    UCHAR State; // 内存 ProcessInMemory ProcessOutOfMemory 转移（物理内存不够时?） ProcessInTransition PorcessOutTransition 虚拟空间内容换入、换出物理内存 ProcessInSwap ProcessOutSwap
+    UCHAR ThreadSeed; // 线程运行的理想处理器
+    UCHAR PowerState; // 电源状态
+    UCHAR IdealNode;  // 进程优先运行的处理器节点
     BOOLEAN Visited;
     union {
         KEXECUTE_OPTIONS Flags;
-        UCHAR ExecuteOptions;
+        UCHAR ExecuteOptions;  // 进程内存的执行选项  内存不可执行
     };
 
 #if !defined(_X86_) && !defined(_AMD64_)
@@ -1043,8 +1043,8 @@ typedef struct _KPROCESS {
 
 #endif
 
-    ULONG_PTR StackCount;
-    LIST_ENTRY ProcessListEntry;
+    ULONG_PTR StackCount;  // 当前进程的内存中，有多少线程的栈
+    LIST_ENTRY ProcessListEntry; // 系统具有活动线程的进程的链表  表头为KiProcessListHead
 } KPROCESS, *PKPROCESS, *PRKPROCESS;
 
 //
@@ -1073,8 +1073,8 @@ typedef struct _KTHREAD {
     // referenced.
     //
 
-    DISPATCHER_HEADER Header;
-    LIST_ENTRY MutantListHead;
+    DISPATCHER_HEADER Header; // 分发器对象  
+    LIST_ENTRY MutantListHead; // [mutex] 
 
     //
     // The following fields are referenced during context switches and wait
@@ -1082,58 +1082,58 @@ typedef struct _KTHREAD {
     // hit ratios.
     //
 
-    PVOID InitialStack;
-    PVOID StackLimit;
-    PVOID KernelStack;
+    PVOID InitialStack;  // 原始的内核栈位置  高地址
+    PVOID StackLimit;  // 内核栈的低地址
+    PVOID KernelStack;  // 实际的内核栈开始位置 InitialStack - (KTRAP_FRAME_LENGTH + sizeof(FX_SAVE_AREA)
 
-    KSPIN_LOCK ThreadLock;
+    KSPIN_LOCK ThreadLock;  // 为自旋锁 spin lock 
     union {
-        KAPC_STATE ApcState;
+        KAPC_STATE ApcState;  // 异步程序调用
         struct {
-            UCHAR ApcStateFill[KAPC_STATE_ACTUAL_LENGTH];
-            BOOLEAN ApcQueueable;
-            volatile UCHAR NextProcessor;
+            UCHAR ApcStateFill[KAPC_STATE_ACTUAL_LENGTH]; // 
+            BOOLEAN ApcQueueable;  // 是否可以插入APC
+            volatile UCHAR NextProcessor; // 处理器
             volatile UCHAR DeferredProcessor;
-            UCHAR AdjustReason;
-            SCHAR AdjustIncrement;
+            UCHAR AdjustReason; // 优先级调整原因
+            SCHAR AdjustIncrement; // 优先级调整量
         };
     };
 
-    KSPIN_LOCK ApcQueueLock;
+    KSPIN_LOCK ApcQueueLock; // spin lock 保护APC队列的操作
 
 #if !defined(_AMD64_)
 
-    ULONG ContextSwitches;
-    volatile UCHAR State;
-    UCHAR NpxState;
-    KIRQL WaitIrql;
-    KPROCESSOR_MODE WaitMode;
+    ULONG ContextSwitches; // 线程环境切换的次数
+    volatile UCHAR State;  // 线程状态  KTHREAD_STATE
+    UCHAR NpxState;  // 浮点处理器状态
+    KIRQL WaitIrql;  // Interrupt Request Level 等待中断请求等级
+    KPROCESSOR_MODE WaitMode; // 当线程等待时，处理器模式(内核模式or用户模式)
 
 #endif
 
     LONG_PTR WaitStatus;
     union {
-        PKWAIT_BLOCK WaitBlockList;
-        PKGATE GateObject;
+        PKWAIT_BLOCK WaitBlockList;  // 该线程正在等待的分发器对象列表
+        PKGATE GateObject;  // 门对象？
     };
 
-    BOOLEAN Alertable;
-    BOOLEAN WaitNext;
-    UCHAR WaitReason;
-    SCHAR Priority;
-    UCHAR EnableStackSwap;
-    volatile UCHAR SwapBusy;
-    BOOLEAN Alerted[MaximumMode];
+    BOOLEAN Alertable;  // 是否可以被唤醒 
+    BOOLEAN WaitNext; // 是否马上调用内核等待函数
+    UCHAR WaitReason;  // 等待原因
+    SCHAR Priority;  // 线程de动态优先级
+    UCHAR EnableStackSwap;  // 内核栈是否允许换出到外存
+    volatile UCHAR SwapBusy; // 当前是否正在上下文切换
+    BOOLEAN Alerted[MaximumMode];  // 在每一种警告模式下是否可以被唤醒
     union {
-        LIST_ENTRY WaitListEntry;
+        LIST_ENTRY WaitListEntry;  // 线程等待被执行时 加入KiStackInSwapListHead链表  DeferredReady状态是，加入DeferredReadyListHead链表
         SINGLE_LIST_ENTRY SwapListEntry;
     };
 
-    PRKQUEUE Queue;
+    PRKQUEUE Queue; // 队列分发器
 
 #if !defined(_AMD64_)
 
-    ULONG WaitTime;
+    ULONG WaitTime; // 线程Start wait time
     union {
         struct {
             SHORT KernelApcDisable;
@@ -1266,9 +1266,9 @@ typedef struct _KTHREAD {
 #endif
 
     BOOLEAN KernelStackResident;
-    SCHAR BasePriority;
-    SCHAR PriorityDecrement;
-    CHAR Saturation;
+    SCHAR BasePriority;  // 线程的静态优先级
+    SCHAR PriorityDecrement;  // 优先级动态调整过程中的递减值
+    CHAR Saturation;  // 线程基本优先级相对于进程的基本优先级的调整量，是否超过整个区间的一半  0,1，-1
     KAFFINITY UserAffinity;
     PKPROCESS Process;
     KAFFINITY Affinity;
@@ -1305,7 +1305,7 @@ typedef struct _KTHREAD {
     };
 
     PVOID Win32Thread;
-    PVOID StackBase;
+    PVOID StackBase;  // 当前栈的基地址
     union {
         KAPC SuspendApc;
         struct {
