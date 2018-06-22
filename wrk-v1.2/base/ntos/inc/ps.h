@@ -145,9 +145,9 @@ typedef struct _SE_AUDIT_PROCESS_CREATION_INFO {
 } SE_AUDIT_PROCESS_CREATION_INFO, *PSE_AUDIT_PROCESS_CREATION_INFO;
 
 typedef enum _PS_QUOTA_TYPE {
-    PsNonPagedPool = 0,
-    PsPagedPool    = 1,
-    PsPageFile     = 2,
+    PsNonPagedPool = 0,  // 非换页内存池
+    PsPagedPool    = 1,  // 换页内存池
+    PsPageFile     = 2,  // 交换文件
     PsQuotaTypes   = 3
 } PS_QUOTA_TYPE, *PPS_QUOTA_TYPE;
 
@@ -229,7 +229,7 @@ typedef struct _WOW64_PROCESS {
     ((Flags&(Bits)) == (Bits))
 
 // Process structure.
-//
+// 执行体层
 // If you remove a field from this structure, please also
 // remove the reference to it from within the kernel debugger
 // (nt\private\sdktools\ntsd\ntkext.c)
@@ -246,10 +246,10 @@ typedef struct _EPROCESS {
     // Process and thread affinity setting.
     //
 
-    EX_PUSH_LOCK ProcessLock;
+    EX_PUSH_LOCK ProcessLock;  // push lock
 
-    LARGE_INTEGER CreateTime;
-    LARGE_INTEGER ExitTime;
+    LARGE_INTEGER CreateTime;  // 进程的创建时间
+    LARGE_INTEGER ExitTime;  // 进程的退出时间
 
     //
     // Structure to allow lock free cross process access to the process
@@ -258,9 +258,9 @@ typedef struct _EPROCESS {
     // section or address space references.
     //
 
-    EX_RUNDOWN_REF RundownProtect;
+    EX_RUNDOWN_REF RundownProtect;  // 进程停止保护锁  
 
-    HANDLE UniqueProcessId;
+    HANDLE UniqueProcessId; // 进程ID
 
     //
     // Global list of all processes in the system. Processes are removed
@@ -269,40 +269,40 @@ typedef struct _EPROCESS {
     // because of this.
     //
 
-    LIST_ENTRY ActiveProcessLinks;
+    LIST_ENTRY ActiveProcessLinks; // 活动进程双链表  PsActiveProcessHead
 
     //
     // Quota Fields.
     //
 
-    SIZE_T QuotaUsage[PsQuotaTypes];
-    SIZE_T QuotaPeak[PsQuotaTypes];
-    SIZE_T CommitCharge;
+    SIZE_T QuotaUsage[PsQuotaTypes];  // 一进程的内存使用量
+    SIZE_T QuotaPeak[PsQuotaTypes];  // 一进程的尖峰使用量
+    SIZE_T CommitCharge;  // 进程虚拟内存已提交的页面数
 
     //
     // VmCounters.
     //
 
-    SIZE_T PeakVirtualSize;
-    SIZE_T VirtualSize;
+    SIZE_T PeakVirtualSize;  // 虚拟内存大小de尖峰值
+    SIZE_T VirtualSize;  // 虚拟内存大小
 
-    LIST_ENTRY SessionProcessLinks;
+    LIST_ENTRY SessionProcessLinks;  // 系统会话进程链表
 
-    PVOID DebugPort;
-    PVOID ExceptionPort;
-    PHANDLE_TABLE ObjectTable;
+    PVOID DebugPort;  // 调试端口
+    PVOID ExceptionPort; // 异常端口
+    PHANDLE_TABLE ObjectTable;  // 进程句柄表 已打开的对象
 
     //
     // Security.
     //
 
-    EX_FAST_REF Token;
+    EX_FAST_REF Token;  // 进程的快速引用，指向该进程的访问令牌，用于该进程的安全访问检查
 
-    PFN_NUMBER WorkingSetPage;
-    KGUARDED_MUTEX AddressCreationLock;
-    KSPIN_LOCK HyperSpaceLock;
+    PFN_NUMBER WorkingSetPage;  // 进程工作集的页面
+    KGUARDED_MUTEX AddressCreationLock;  // guarded mutex 守护互斥体锁  用于保护对地址空间的操作
+    KSPIN_LOCK HyperSpaceLock; // spin lock 用于保护进程的超空间
 
-    struct _ETHREAD *ForkInProgress;
+    struct _ETHREAD *ForkInProgress;  // 正在复制地址空间的线程
     ULONG_PTR HardwareTrigger;
 
     PMM_AVL_TABLE PhysicalVadRoot;
@@ -377,8 +377,8 @@ typedef struct _EPROCESS {
     LARGE_INTEGER WriteTransferCount;
     LARGE_INTEGER OtherTransferCount;
 
-    SIZE_T CommitChargeLimit;
-    SIZE_T CommitChargePeak;
+    SIZE_T CommitChargeLimit; // 已提交页面数量的限制值 0-没有限制
+    SIZE_T CommitChargePeak;  // 尖峰时刻已提交的页面数量
 
     PVOID AweInfo;
 

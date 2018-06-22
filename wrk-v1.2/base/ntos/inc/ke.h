@@ -1135,9 +1135,9 @@ typedef struct _KTHREAD {
 
     ULONG WaitTime; // 线程Start wait time
     union {
-        struct {
-            SHORT KernelApcDisable;
-            SHORT SpecialApcDisable;
+        struct { // APC: Asynchronous Procedure Call
+            SHORT KernelApcDisable;  
+            SHORT SpecialApcDisable; 
         };
 
         ULONG CombinedApcDisable;
@@ -1145,9 +1145,9 @@ typedef struct _KTHREAD {
 
 #endif
 
-    PVOID Teb;
+    PVOID Teb;  // TEB: 线程环境块 Thread Env Block PTEB
     union {
-        KTIMER Timer;
+        KTIMER Timer;  // 定时器  KeWaitForSingleObject  KeWaitForMultipleObjects
         struct {
             UCHAR TimerFill[KTIMER_ACTUAL_LENGTH];
 
@@ -1238,9 +1238,9 @@ typedef struct _KTHREAD {
     // The following fields are accessed during system service dispatch.
     //
 
-    PKTRAP_FRAME TrapFrame;
-    PVOID CallbackStack;
-    PVOID ServiceTable;
+    PKTRAP_FRAME TrapFrame;  // 切线程时，保存的寄存器数据
+    PVOID CallbackStack;  // 线程的回调 
+    PVOID ServiceTable;  // 用到的系统服务表   KeServiceDescriptorTable
 
 #if defined(_AMD64_)
 
@@ -1253,10 +1253,10 @@ typedef struct _KTHREAD {
     // completion.
     //
 
-    UCHAR ApcStateIndex;
+    UCHAR ApcStateIndex; // 当前APC在ApcStatePointer中的索引
     UCHAR IdealProcessor;
-    BOOLEAN Preempted;
-    BOOLEAN ProcessReadyQueue;
+    BOOLEAN Preempted;  // TRUE: 已被高优先级线程抢占 
+    BOOLEAN ProcessReadyQueue;  // 是否在进程的线程列表中ThreadListHead
 
 #if defined(_AMD64_)
 
@@ -1265,19 +1265,19 @@ typedef struct _KTHREAD {
 
 #endif
 
-    BOOLEAN KernelStackResident;
+    BOOLEAN KernelStackResident; // 线程的内核栈是否驻留在内存中
     SCHAR BasePriority;  // 线程的静态优先级
     SCHAR PriorityDecrement;  // 优先级动态调整过程中的递减值
     CHAR Saturation;  // 线程基本优先级相对于进程的基本优先级的调整量，是否超过整个区间的一半  0,1，-1
-    KAFFINITY UserAffinity;
-    PKPROCESS Process;
-    KAFFINITY Affinity;
+    KAFFINITY UserAffinity;  // 线程运行在哪个CPU上 线程
+    PKPROCESS Process;  // 线程的进程对象
+    KAFFINITY Affinity;  // 线程运行在哪个CPU上 系统
 
     //
     // The below fields are infrequently referenced.
     //
 
-    PKAPC_STATE ApcStatePointer[2];
+    PKAPC_STATE ApcStatePointer[2];  // 0:ApcSatate  1:SavedApcState
     union {
         KAPC_STATE SavedApcState;
         struct {
@@ -1307,7 +1307,7 @@ typedef struct _KTHREAD {
     PVOID Win32Thread;
     PVOID StackBase;  // 当前栈的基地址
     union {
-        KAPC SuspendApc;
+        KAPC SuspendApc;  // 线程挂起操作  Suspend
         struct {
             UCHAR SuspendApcFill0[KAPC_OFFSET_TO_SPARE_BYTE0];
             SCHAR Quantum;
@@ -1341,7 +1341,7 @@ typedef struct _KTHREAD {
     };
 
     union {
-        KSEMAPHORE SuspendSemaphore;
+        KSEMAPHORE SuspendSemaphore; // 线程修复操作  Resume 
         struct {
             UCHAR SuspendSemaphorefill[KSEMAPHORE_ACTUAL_LENGTH];
             ULONG SListFaultCount;
