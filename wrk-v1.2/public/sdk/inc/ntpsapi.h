@@ -36,7 +36,7 @@ extern "C" {
 #define PROCESS_CREATE_THREAD     (0x0002)  // winnt
 #define PROCESS_SET_SESSIONID     (0x0004)  // winnt
 #define PROCESS_VM_OPERATION      (0x0008)  // winnt
-#define PROCESS_VM_READ           (0x0010)  // winnt
+#define PROCESS_VM_READ           (0x0010)  // winnt  虚拟内存读权限
 #define PROCESS_VM_WRITE          (0x0020)  // winnt
 // begin_ntddk begin_wdm begin_ntifs
 #define PROCESS_DUP_HANDLE        (0x0040)  // winnt
@@ -164,8 +164,8 @@ typedef struct _PEB_FREE_BLOCK {
 //
 
 typedef struct _CLIENT_ID {
-    HANDLE UniqueProcess;
-    HANDLE UniqueThread;
+    HANDLE UniqueProcess;  // UniqueProcessId
+    HANDLE UniqueThread;   // 线程在进程句柄表中的句柄
 } CLIENT_ID;
 typedef CLIENT_ID *PCLIENT_ID;
 
@@ -396,13 +396,14 @@ typedef struct _INITIAL_TEB {
     PVOID StackAllocationBase;
 } INITIAL_TEB, *PINITIAL_TEB;
 
+// 进程优先级  PROCESS.PriorityClass
 #define PROCESS_PRIORITY_CLASS_UNKNOWN      0
-#define PROCESS_PRIORITY_CLASS_IDLE         1
-#define PROCESS_PRIORITY_CLASS_NORMAL       2
-#define PROCESS_PRIORITY_CLASS_HIGH         3
-#define PROCESS_PRIORITY_CLASS_REALTIME     4
-#define PROCESS_PRIORITY_CLASS_BELOW_NORMAL 5
-#define PROCESS_PRIORITY_CLASS_ABOVE_NORMAL 6
+#define PROCESS_PRIORITY_CLASS_IDLE         1  // 空闲
+#define PROCESS_PRIORITY_CLASS_NORMAL       2  // 普通
+#define PROCESS_PRIORITY_CLASS_HIGH         3  // 高
+#define PROCESS_PRIORITY_CLASS_REALTIME     4  // 实时
+#define PROCESS_PRIORITY_CLASS_BELOW_NORMAL 5  // 普通之下
+#define PROCESS_PRIORITY_CLASS_ABOVE_NORMAL 6  // 普通之上
 
 typedef struct _PROCESS_PRIORITY_CLASS {
     BOOLEAN Foreground;

@@ -172,7 +172,7 @@ typedef struct _EPROCESS_QUOTA_TRACK {
 typedef struct _EPROCESS_QUOTA_BLOCK {
     EPROCESS_QUOTA_ENTRY QuotaEntry[PsQuotaTypes];
     LIST_ENTRY QuotaList; // All additional quota blocks are chained through here
-    ULONG ReferenceCount;
+    ULONG ReferenceCount;  // 多少进程在使用此内存分配额度标准
     ULONG ProcessCount; // Total number of processes still referencing this block
 #if defined (PS_TRACK_QUOTA)
     EPROCESS_QUOTA_TRACK Tracker[2][EPROCESS_QUOTA_TRACK_MAX];
@@ -188,7 +188,7 @@ typedef struct _PAGEFAULT_HISTORY {
     ULONG MaxIndex;
     KSPIN_LOCK SpinLock;
     PVOID Reserved;
-    PROCESS_WS_WATCH_INFORMATION WatchInfo[1];
+    PROCESS_WS_WATCH_INFORMATION WatchInfo[1];  // 进程的页面错误信息
 } PAGEFAULT_HISTORY, *PPAGEFAULT_HISTORY;
 
 #define PS_WS_TRIM_FROM_EXE_HEADER        1
@@ -303,101 +303,101 @@ typedef struct _EPROCESS {
     KSPIN_LOCK HyperSpaceLock; // spin lock 用于保护进程的超空间
 
     struct _ETHREAD *ForkInProgress;  // 正在复制地址空间的线程
-    ULONG_PTR HardwareTrigger;
+    ULONG_PTR HardwareTrigger;  // 记录硬件错误性能分析次数
 
-    PMM_AVL_TABLE PhysicalVadRoot;
-    PVOID CloneRoot;
-    PFN_NUMBER NumberOfPrivatePages;
-    PFN_NUMBER NumberOfLockedPages;
-    PVOID Win32Process;
-    struct _EJOB *Job;
-    PVOID SectionObject;
+    PMM_AVL_TABLE PhysicalVadRoot; // 指向进程的物理VAD树的根 VAD: virtual address descriptor
+    PVOID CloneRoot; // 平衡树  在进程地址空间复制时，被创建   用于支持fork语义(进程创建子进程方面的优化方法)
+    PFN_NUMBER NumberOfPrivatePages;    // 进程私有页面的数量
+    PFN_NUMBER NumberOfLockedPages;	    // 进程被锁页面的数量
+    PVOID Win32Process;	// Windows子系统进程(GUI进程)
+    struct _EJOB *Job; 
+    PVOID SectionObject;  // 进程可执行映像文件的内存区对象 Image
 
-    PVOID SectionBaseAddress;
+    PVOID SectionBaseAddress;  // SectionObject基地址
 
-    PEPROCESS_QUOTA_BLOCK QuotaBlock;
+    PEPROCESS_QUOTA_BLOCK QuotaBlock;  // 进程内存块分配额度  表头：PspQuotaBlockList    系统默认值PspDefaultQuotaBlock
 
-    PPAGEFAULT_HISTORY WorkingSetWatch;
-    HANDLE Win32WindowStation;
-    HANDLE InheritedFromUniqueProcessId;
+    PPAGEFAULT_HISTORY WorkingSetWatch;  // 监视进程的页面错误
+    HANDLE Win32WindowStation;  // 进程所属窗口的句柄   句柄作用域：进程内部
+    HANDLE InheritedFromUniqueProcessId;  // 父进程标识符
 
-    PVOID LdtInformation;
-    PVOID VadFreeHint;
-    PVOID VdmObjects;
-    PVOID DeviceMap;
+    PVOID LdtInformation;  // 进程LDT(局部描述符表)
+    PVOID VadFreeHint;  // VAD(虚拟地址描述符)节点   用于加速VAD树的查找
+    PVOID VdmObjects;	// 当前进程VDM数据区 virual directory memory??
+    PVOID DeviceMap;    // 进程使用到的设备表
 
     PVOID Spare0[3];
     union {
-        HARDWARE_PTE PageDirectoryPte;
+        HARDWARE_PTE PageDirectoryPte;  // 顶级页目录页面的页表项
         ULONGLONG Filler;
     };
-    PVOID Session;
-    UCHAR ImageFileName[ 16 ];
+    PVOID Session;  // 进程所在的系统会话 
+    UCHAR ImageFileName[ 16 ];  // 进程的映像文件名
 
-    LIST_ENTRY JobLinks;
-    PVOID LockedPagesList;
+    LIST_ENTRY JobLinks;  // 链接1个Job中的所有进程   
+    PVOID LockedPagesList;  // 是个LOCK_HEADER指针    记录哪些页面被锁  
 
-    LIST_ENTRY ThreadListHead;
+    LIST_ENTRY ThreadListHead;  // 包含一个进程的所有线程 
 
     //
     // Used by rdr/security for authentication.
     //
 
-    PVOID SecurityPort;
+    PVOID SecurityPort;  // 与lsass进程间的跨进程通信端口
 
 #ifdef _WIN64
     PWOW64_PROCESS Wow64Process;
 #else
-    PVOID PaeTop;
+    PVOID PaeTop;  // PAE内存访问 PAE: Physical Address Extension 支持4GB 以上物理内存
 #endif
 
-    ULONG ActiveThreads;
+    ULONG ActiveThreads; // 当前活动线程数   0：所有线程都已退出
 
-    ACCESS_MASK GrantedAccess;
+    ACCESS_MASK GrantedAccess;  // 进程的访问权限  如：PROCESS_VM_READ
 
-    ULONG DefaultHardErrorProcessing;
+    ULONG DefaultHardErrorProcessing;  // 默认的硬件错误处理
 
-    NTSTATUS LastThreadExitStatus;
+    NTSTATUS LastThreadExitStatus;  // 记录刚才最后一个线程的退出状态
 
     //
-    // Peb
+    // Peb  Process Env Block
     //
 
-    PPEB Peb;
+    PPEB Peb;  // 进程环境块 
 
     //
     // Pointer to the prefetches trace block.
-    //
-    EX_FAST_REF PrefetchTrace;
+    // 进程预取痕迹
+    EX_FAST_REF PrefetchTrace;  
 
-    LARGE_INTEGER ReadOperationCount;
-    LARGE_INTEGER WriteOperationCount;
+    LARGE_INTEGER ReadOperationCount;  // NtReadFile 调用次数
+    LARGE_INTEGER WriteOperationCount; // NtWriteFile 调用次数
     LARGE_INTEGER OtherOperationCount;
-    LARGE_INTEGER ReadTransferCount;
-    LARGE_INTEGER WriteTransferCount;
+    LARGE_INTEGER ReadTransferCount;  // IO读操作完成次数
+    LARGE_INTEGER WriteTransferCount; // IO写操作完成次数
     LARGE_INTEGER OtherTransferCount;
 
     SIZE_T CommitChargeLimit; // 已提交页面数量的限制值 0-没有限制
     SIZE_T CommitChargePeak;  // 尖峰时刻已提交的页面数量
 
-    PVOID AweInfo;
+    PVOID AweInfo;  // AWEINFO  AWE: Address Windowing Extension  地址窗口扩展
 
     //
     // This is used for SeAuditProcessCreation.
     // It contains the full path to the image file.
     //
 
-    SE_AUDIT_PROCESS_CREATION_INFO SeAuditProcessCreationInfo;
+    SE_AUDIT_PROCESS_CREATION_INFO SeAuditProcessCreationInfo; //  包含创建进程时，指定的进程映像全路径名
 
-    MMSUPPORT Vm;
+    MMSUPPORT Vm;  // 虚拟内存支持
 
 #if !defined(_WIN64)
-    LIST_ENTRY MmProcessLinks;
+    LIST_ENTRY MmProcessLinks;  // 有自己地址空间的进程链表  表头：MmProcessList   用于全局内存管理
 #else
     ULONG Spares[2];
 #endif
 
-    ULONG ModifiedPageCount;
+    ULONG ModifiedPageCount; // 当前进程已修改页面数
 
     #define PS_JOB_STATUS_NOT_REALLY_ACTIVE      0x00000001UL
     #define PS_JOB_STATUS_ACCOUNTING_FOLDED      0x00000002UL
@@ -453,7 +453,7 @@ typedef struct _EPROCESS {
 
     union {
 
-        ULONG Flags;
+        ULONG Flags;  // 进程Flags  PS_PROCESS_FLAGS_XXX
 
         //
         // Fields can only be set by the PS_SET_BITS and other interlocked
@@ -494,21 +494,21 @@ typedef struct _EPROCESS {
         };
     };
 
-    NTSTATUS ExitStatus;
+    NTSTATUS ExitStatus;  // 进程退出状态
 
-    USHORT NextPageColor;
+    USHORT NextPageColor;  // 物理页面分配算法
     union {
         struct {
-            UCHAR SubSystemMinorVersion;
-            UCHAR SubSystemMajorVersion;
+            UCHAR SubSystemMinorVersion;  // 一进程的子系统主版本号
+            UCHAR SubSystemMajorVersion;  // 一进程的子系统次版本号
         };
-        USHORT SubSystemVersion;
+        USHORT SubSystemVersion; 
     };
-    UCHAR PriorityClass;
+    UCHAR PriorityClass; // 进程的优先级    PROCESS_PRIORITY_CLASS_XXX
 
-    MM_AVL_TABLE VadRoot;
+    MM_AVL_TABLE VadRoot; // 平衡二叉树的根节点  管理该进程的虚拟地址空间
 
-    ULONG Cookie;
+    ULONG Cookie;  // 一代表该进程的随机值
 
 } EPROCESS, *PEPROCESS; 
 
@@ -545,23 +545,23 @@ typedef struct _TERMINATION_PORT {
 typedef struct _ETHREAD {
     KTHREAD Tcb;
 
-    LARGE_INTEGER CreateTime;
+    LARGE_INTEGER CreateTime; // 线程创建时间
 
     union {
-        LARGE_INTEGER ExitTime;
-        LIST_ENTRY LpcReplyChain;
-        LIST_ENTRY KeyedWaitChain;
+        LARGE_INTEGER ExitTime;  // 线程退出时间
+        LIST_ENTRY LpcReplyChain;   // 用于跨进程通信 LPC  Load Procedure Call
+        LIST_ENTRY KeyedWaitChain;  // 带键事件的等待链表
     };
     union {
-        NTSTATUS ExitStatus;
-        PVOID OfsChain;
+        NTSTATUS ExitStatus;  // 退出状态
+        PVOID OfsChain; 
     };
 
     //
     // Registry
     //
 
-    LIST_ENTRY PostBlockList;
+    LIST_ENTRY PostBlockList;  // PCM_POST_BLOCK类型节点  用于一线程向 配置管理器 登记 注册表键的变化通知
 
     //
     // Single linked list of termination blocks
@@ -572,38 +572,38 @@ typedef struct _ETHREAD {
         // List of termination ports
         //
 
-        PTERMINATION_PORT TerminationPort;
+        PTERMINATION_PORT TerminationPort;  // 线程退出时，系统会通知所有已经登记过要接收其终止事件的那些端口
 
         //
         // List of threads to be reaped. Only used at thread exit
         //
 
-        struct _ETHREAD *ReaperLink;
+        struct _ETHREAD *ReaperLink;  // 在线程退出时，该节点被挂在PsReaperListHead链表上   在线程回收期(reaper)的工作项目(WorkItem)中回收该线程的内核栈
 
         //
         // Keyvalue being waited for
         //
-        PVOID KeyedWaitValue;
+        PVOID KeyedWaitValue;  // 带键事件的键值
 
     };
 
-    KSPIN_LOCK ActiveTimerListLock;
-    LIST_ENTRY ActiveTimerListHead;
+    KSPIN_LOCK ActiveTimerListLock;  // 操作ActiveTimerListHead链表的自旋锁
+    LIST_ENTRY ActiveTimerListHead;  // 当前线程的所有定时器
 
-    CLIENT_ID Cid;
+    CLIENT_ID Cid;  // 线程的唯一标识符
 
     //
-    // Lpc
-    //
+    // Lpc Load Procedure Call
+    // 信号量对象
 
     union {
-        KSEMAPHORE LpcReplySemaphore;
-        KSEMAPHORE KeyedWaitSemaphore;
+        KSEMAPHORE LpcReplySemaphore;   // LPC应答通知
+        KSEMAPHORE KeyedWaitSemaphore;  // 用于处理带键的事件
     };
 
     union {
-        PVOID LpcReplyMessage;          // -> Message that contains the reply
-        PVOID LpcWaitingOnPort;
+        PVOID LpcReplyMessage;          // -> Message that contains the reply   只想LPCP_MESSAGE的指针  包含LPC应答消息
+        PVOID LpcWaitingOnPort;         // 在哪个端口对象上等待 
     };
 
     //
@@ -614,25 +614,25 @@ typedef struct _ETHREAD {
     //        a client.
     //
 
-    PPS_IMPERSONATION_INFORMATION ImpersonationInfo;
+    PPS_IMPERSONATION_INFORMATION ImpersonationInfo;  // 指向线程的模仿信息  
 
     //
     // Io
     //
 
-    LIST_ENTRY IrpList;
+    LIST_ENTRY IrpList;    // 当前线程所有正在处理 但未完成的I/O请求(IRP对象)
 
     //
-    //  File Systems
+    //  File Systems  文件系统
     //
 
-    ULONG_PTR TopLevelIrp;  // either NULL, an Irp or a flag defined in FsRtl.h
-    struct _DEVICE_OBJECT *DeviceToVerify;
+    ULONG_PTR TopLevelIrp;  // either NULL, an Irp or a flag defined in FsRtl.h  指向线程的顶级IRP或指向NULL或一个IRP   只有线程I/O调用层次中最顶级的组件是文件系统时，其才指向当前IRP
+    struct _DEVICE_OBJECT *DeviceToVerify;   // 待检验的设备对象   设备发生变化
 
-    PEPROCESS ThreadsProcess;
-    PVOID StartAddress;
+    PEPROCESS ThreadsProcess;  // 当前线程所属进程
+    PVOID StartAddress;  // 系统DLL中的 线程启动地址
     union {
-        PVOID Win32StartAddress;
+        PVOID Win32StartAddress;  // Windows子系统接收到的 的线程启动地址  CreateThread返回的地址
         ULONG LpcReceivedMessageId;
     };
     //
