@@ -633,35 +633,35 @@ typedef struct _ETHREAD {
     PVOID StartAddress;  // 系统DLL中的 线程启动地址
     union {
         PVOID Win32StartAddress;  // Windows子系统接收到的 的线程启动地址  CreateThread返回的地址
-        ULONG LpcReceivedMessageId;
+        ULONG LpcReceivedMessageId;  // 接受到的LPC消息的ID  
     };
     //
     // Ps
     //
 
-    LIST_ENTRY ThreadListEntry;
+    LIST_ENTRY ThreadListEntry;  // ThreadListHead 
 
     //
     // Rundown protection structure. Acquire this to do cross thread
     // TEB, TEB32 or stack references.
     //
 
-    EX_RUNDOWN_REF RundownProtect;
+    EX_RUNDOWN_REF RundownProtect;  // 线程的停止保护锁  
 
     //
     // Lock to protect thread impersonation information
     //
-    EX_PUSH_LOCK ThreadLock;
+    EX_PUSH_LOCK ThreadLock;  // 推锁，用于保护线程数据  PspLockThreadSecurityExclusive 
 
-    ULONG LpcReplyMessageId;    // MessageId this thread is waiting for reply to
+    ULONG LpcReplyMessageId;    // MessageId this thread is waiting for reply to  指明当前线程正在等待一个消息的应答
 
-    ULONG ReadClusterSize;
+    ULONG ReadClusterSize;  // 指明一次I/O操作中读取多少个页面   用于页面交换文件和内存映射文件的读操作
 
     //
     // Client/server
     //
 
-    ACCESS_MASK GrantedAccess;
+    ACCESS_MASK GrantedAccess;  // 线程的访问权限  THREAD_XXX  THREAD_TERMINATE-线程终止权限
 
     //
     // Flags for cross thread access. Use interlocked operations
@@ -723,7 +723,7 @@ typedef struct _ETHREAD {
 
     union {
 
-        ULONG CrossThreadFlags;
+        ULONG CrossThreadFlags;  // 跨线程访问的标志符  
 
         //
         // The following fields are for the debugger only. Do not use.
@@ -731,15 +731,15 @@ typedef struct _ETHREAD {
         //
 
         struct {
-            ULONG Terminated              : 1;
-            ULONG DeadThread              : 1;
-            ULONG HideFromDebugger        : 1;
-            ULONG ActiveImpersonationInfo : 1;
-            ULONG SystemThread            : 1;
-            ULONG HardErrorsAreDisabled   : 1;
-            ULONG BreakOnTermination      : 1;
-            ULONG SkipCreationMsg         : 1;
-            ULONG SkipTerminationMsg      : 1;
+            ULONG Terminated              : 1;  // 线程已终止
+            ULONG DeadThread              : 1;  // 线程创建失败
+            ULONG HideFromDebugger        : 1;  // 线程对于调试器不可见
+            ULONG ActiveImpersonationInfo : 1;  // 线程正在模仿？？
+            ULONG SystemThread            : 1;  // 是个系统线程
+            ULONG HardErrorsAreDisabled   : 1;  // 对于该线程，硬件错误无效
+            ULONG BreakOnTermination      : 1;  // 调试器在线程终止时，停下该线程
+            ULONG SkipCreationMsg         : 1;  // 不向调试器发送创建消息
+            ULONG SkipTerminationMsg      : 1;  // 不向调试器发送终止消息
         };
     };
 
@@ -749,7 +749,7 @@ typedef struct _ETHREAD {
     //
 
     union {
-        ULONG SameThreadPassiveFlags;
+        ULONG SameThreadPassiveFlags;  // 被线程自身访问的标志位(APC中断级别上)
 
         struct {
 
@@ -799,9 +799,9 @@ typedef struct _ETHREAD {
         };
     };
 
-    BOOLEAN ForwardClusterOnly;
-    BOOLEAN DisablePageFaultClustering;
-    UCHAR ActiveFaultCount;
+    BOOLEAN ForwardClusterOnly;  // 是否仅仅前向聚集
+    BOOLEAN DisablePageFaultClustering;  // 控制页面交换的聚集与否
+    UCHAR ActiveFaultCount;  // 正在进行中的页面错误数量
 
 #if defined (PERF_DATA)
     ULONG PerformanceCountLow;
