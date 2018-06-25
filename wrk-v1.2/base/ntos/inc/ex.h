@@ -5044,7 +5044,7 @@ typedef struct _HANDLE_TABLE_ENTRY_INFO {
 //     to call UnlockHandleTableEntry explicitly.
 //
 
-typedef struct _HANDLE_TABLE_ENTRY {
+typedef struct _HANDLE_TABLE_ENTRY {  // 句柄项
 
     //
     //  The pointer to the object overloaded with three ob attributes bits in
@@ -5053,11 +5053,11 @@ typedef struct _HANDLE_TABLE_ENTRY {
 
     union {
 
-        PVOID Object;
+        PVOID Object;  // 指向句柄所代表的对象
 
-        ULONG ObAttributes;
+        ULONG ObAttributes;  // OBJ_HANDLE_ATTRIBUTES
 
-        PHANDLE_TABLE_ENTRY_INFO InfoTable;
+        PHANDLE_TABLE_ENTRY_INFO InfoTable; // 各个句柄表页面的第一个表项  
 
         ULONG_PTR Value;
     };
@@ -5075,16 +5075,16 @@ typedef struct _HANDLE_TABLE_ENTRY {
 
         union {
 
-            ACCESS_MASK GrantedAccess;
+            ACCESS_MASK GrantedAccess;  // 访问掩码
 
-            struct {
+            struct {  // 当NtGlobalFlag中包含 FLG_KERNEL_STACK_DB标记时使用
 
                 USHORT GrantedAccessIndex;
                 USHORT CreatorBackTraceIndex;
             };
         };
 
-        LONG NextFreeTableEntry;
+        LONG NextFreeTableEntry; // 空闲时表示下一个空闲句柄索引
     };
 
 } HANDLE_TABLE_ENTRY, *PHANDLE_TABLE_ENTRY;
@@ -5173,7 +5173,7 @@ typedef struct _HANDLE_TRACE_DEBUG_INFO {
 //  One handle table exists per process.  Unless otherwise specified, via a
 //  call to RemoveHandleTable, all handle tables are linked together in a
 //  global list.  This list is used by the snapshot handle tables call.
-//
+//  句柄只在一个进程范围内有效   
 
 
 typedef struct _HANDLE_TABLE {
@@ -5205,7 +5205,7 @@ typedef struct _HANDLE_TABLE {
     //
     //  The list of global handle tables.  This field is protected by a global
     //  lock.
-    //
+    //  按页面(4KB)申请内存  每个句柄大小为8Byte   即每次回增加512的容量
 
     LIST_ENTRY HandleTableList;
 

@@ -290,7 +290,7 @@ typedef struct _EPROCESS {
 
     PVOID DebugPort;  // 调试端口
     PVOID ExceptionPort; // 异常端口
-    PHANDLE_TABLE ObjectTable;  // 进程句柄表 已打开的对象
+    PHANDLE_TABLE ObjectTable;  // 进程句柄表 已打开的对象的句柄表  HANDLE_TABLE
 
     //
     // Security.
