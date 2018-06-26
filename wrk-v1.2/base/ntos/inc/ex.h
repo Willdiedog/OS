@@ -5042,7 +5042,9 @@ typedef struct _HANDLE_TABLE_ENTRY_INFO {
 //     provided they don't unlock the entry.  When the callbacks return the
 //     entry will be unlocked and the callers or MapHandleToPointer will need
 //     to call UnlockHandleTableEntry explicitly.
-//
+//     有效句柄值：-1：当前进程  -2：当前线程   负值：其绝对值为内核句柄表的索引，只用于内核模式的函数
+//     不超过226的正值：当前进程的句柄表索引
+//     内核句柄表: 系统空间的全局句柄表, 即 ObpKernelHandleTable，跨进程句柄
 
 typedef struct _HANDLE_TABLE_ENTRY {  // 句柄项
 
@@ -5052,10 +5054,14 @@ typedef struct _HANDLE_TABLE_ENTRY {  // 句柄项
     //
 
     union {
+		// 指向句柄所代表的内核对象  
+		// 最低3为：OBJ_PROTECT_CLOSE-是否允许关闭该句柄 
+		// OBJ_INHERIT-改进程的子进程都可以继承该句柄(子进程会拷贝父进程的句柄表)
+		// OBJ_AUDIT_OBJECT_CLOSE 关闭该对象时，是否产生一个审计事件
+        PVOID Object;  
 
-        PVOID Object;  // 指向句柄所代表的对象
-
-        ULONG ObAttributes;  // OBJ_HANDLE_ATTRIBUTES
+		// ObpEncodeProtectClose  ObpGetHandleAttributes
+        ULONG ObAttributes;  // OBJ_HANDLE_ATTRIBUTES  句柄已分配则ObAttributes指本句柄的访问掩码  句柄为空闲句柄,NextFreeTableEntry指向句柄空闲链表 
 
         PHANDLE_TABLE_ENTRY_INFO InfoTable; // 各个句柄表页面的第一个表项  
 
@@ -5084,7 +5090,7 @@ typedef struct _HANDLE_TABLE_ENTRY {  // 句柄项
             };
         };
 
-        LONG NextFreeTableEntry; // 空闲时表示下一个空闲句柄索引
+        LONG NextFreeTableEntry; // 空闲时,表示下一个空闲句柄索引
     };
 
 } HANDLE_TABLE_ENTRY, *PHANDLE_TABLE_ENTRY;
@@ -5179,18 +5185,23 @@ typedef struct _HANDLE_TRACE_DEBUG_INFO {
 typedef struct _HANDLE_TABLE {
 
     //
-    //  A pointer to the top level handle table tree node.
-    //
+    //  A pointer to the top level handle table tree node.  指向句柄表的指针  是句柄表的最高层表页面
+    //  其低2位值代表当前句柄表的层数：
+	//  0-句柄表只有一层，进程最多容纳512(LOWLEVEL_THRESHOLD)个句柄
+	//  1-两层句柄表，句柄数位512x1024(MIDLEVEL_THRESHOLD)  TableCode指向第二层句柄表页面
+	//  2-三层句柄表，句柄数位512x1024x1024(HIGHLEVEL_THRESHOLD)  TableCode指向第三层句柄表页面  
+	//  MAX_HANDLES = pow(2, 24)
+	//  句柄表第一位用于索引到低层
 
-    ULONG_PTR TableCode;
+    ULONG_PTR TableCode;  // 
 
     //
     //  The process who is being charged quota for this handle table and a
     //  unique process id to use in our callbacks
     //
 
-    struct _EPROCESS *QuotaProcess;
-    HANDLE UniqueProcessId;
+    struct _EPROCESS *QuotaProcess;  // 句柄表的内存资源记录在此进程中
+    HANDLE UniqueProcessId;  // 创建进程的ID，用于回调函数
 
 
     //
@@ -5200,19 +5211,19 @@ typedef struct _HANDLE_TABLE {
 
 #define HANDLE_TABLE_LOCKS 4
 
-    EX_PUSH_LOCK HandleTableLock[HANDLE_TABLE_LOCKS];
+    EX_PUSH_LOCK HandleTableLock[HANDLE_TABLE_LOCKS];  // 句柄表锁，仅在句柄表扩展时使用
 
     //
     //  The list of global handle tables.  This field is protected by a global
     //  lock.
     //  按页面(4KB)申请内存  每个句柄大小为8Byte   即每次回增加512的容量
 
-    LIST_ENTRY HandleTableList;
+    LIST_ENTRY HandleTableList;  // 句柄表链表  表头为HandleTableListHead
 
     //
     // Define a field to block on if a handle is found locked.
     //
-    EX_PUSH_LOCK HandleContentionEvent;
+    EX_PUSH_LOCK HandleContentionEvent;  // 若访问句柄时，发生竞争，则在此推锁上等待
 
     //
     // Debug info. Only allocated if we are debugging handles
@@ -5224,37 +5235,37 @@ typedef struct _HANDLE_TABLE {
     //  This counter is used to improve the performance
     //  in ExGetHandleInfo
     //
-    LONG ExtraInfoPages;
+    LONG ExtraInfoPages;  // 审计信息所占用的页面数
 
     //
     //  This is a singly linked list of free table entries.  We don't actually
     //  use pointers, but have each store the index of the next free entry
     //  in the list.  The list is managed as a lifo list.  We also keep track
     //  of the next index that we have to allocate pool to hold.
-    //
+    //  ExpAllocateHandleTableEntry  ExpFreeHandleTableEntry
 
-    ULONG FirstFree;
-
+    ULONG FirstFree;  // 空闲链表表头句柄索引   指针类型:HANDLE_TABLE_ENTRY  NextFreeTableEntry指向下一个HANDLE_TABLE_ENTRY
+	  
     //
     // We free handles to this list when handle debugging is on or if we see
     // that a thread has this handles bucket lock held. The allows us to delay reuse
     // of handles to get a better chance of catching offenders
     //
 
-    ULONG LastFree;
+    ULONG LastFree;  // 最近被释放的句柄索引  用于FIFO类型空闲链表
 
     //
     // This is the next handle index needing a pool allocation. Its also used as a bound
     // for good handles.
     //
 
-    ULONG NextHandleNeedingPool;
+    ULONG NextHandleNeedingPool;  // 下次句柄表扩展的起始句柄索引
 
     //
     //  The number of handle table entries in use.
     //
 
-    LONG HandleCount;
+    LONG HandleCount;   // 正在使用的句柄表项的数量
 
     //
     // Define a flags field
@@ -5267,7 +5278,7 @@ typedef struct _HANDLE_TABLE {
         // some usages of handles and makes debugging a little harder. If this
         // bit is set then we always use FIFO handle allocation.
         //
-        BOOLEAN StrictFIFO : 1;
+        BOOLEAN StrictFIFO : 1;  // 是否使用FIFO风格的重用
     };
 
 } HANDLE_TABLE, *PHANDLE_TABLE;

@@ -149,7 +149,7 @@ ULONG CurrentSeq = 0;
 #define LEVEL_CODE_MASK 3
 
 //
-//  Local support routines
+//  Local support routines  构造初始的句柄表  单层句柄表
 //
 
 PHANDLE_TABLE
@@ -824,7 +824,7 @@ Return Value:
     return;
 }
 
-
+// 创建句柄表
 NTKERNELAPI
 PHANDLE_TABLE
 ExCreateHandleTable (
@@ -2123,7 +2123,7 @@ Return Value:
     //
     //  Translate the input handle to a handle table entry and make
     //  sure it is a valid handle.
-    //    
+    //  从句柄表结构，找到该句柄的索引值指向的句柄表项，然后检查访问权限是否满足
 
     if (((LocalHandle.Index & (LOWLEVEL_COUNT - 1)) == 0) ||
         ((HandleTableEntry = ExpLookupHandleTableEntry(HandleTable, LocalHandle)) == NULL) ||
@@ -2529,7 +2529,7 @@ return_and_exit:
 }
 
 //
-//  Local Support Routine
+//  Local Support Routine 构造初始的句柄表  单层句柄表
 //
 
 PHANDLE_TABLE
@@ -3094,7 +3094,7 @@ Return Value:
 }
 
 
-
+// 扩展 >=2 层的句柄表
 BOOLEAN
 ExpAllocateHandleTableEntrySlow (
     IN PHANDLE_TABLE HandleTable,

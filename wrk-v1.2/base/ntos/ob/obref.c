@@ -1056,7 +1056,7 @@ Return Value:
     return( Status );
 }
 
-
+// 
 NTSTATUS
 ObReferenceObjectByHandle (
     __in HANDLE Handle,
@@ -1239,7 +1239,7 @@ Return Value:
     //  Translate the specified handle to an object table index.
     //
 
-    ObjectTableEntry = ExMapHandleToPointerEx ( HandleTable, Handle, AccessMode );
+    ObjectTableEntry = ExMapHandleToPointerEx ( HandleTable, Handle, AccessMode ); 
 
     //
     //  Make sure the object table entry really does exist

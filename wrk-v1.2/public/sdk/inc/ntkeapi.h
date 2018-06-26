@@ -30,8 +30,8 @@ extern "C" {
 
 // begin_ntddk begin_wdm begin_ntifs begin_nthal
 
-#define LOW_PRIORITY 0              // Lowest thread priority level
-#define LOW_REALTIME_PRIORITY 16    // Lowest realtime priority level
+#define LOW_PRIORITY 0              // Lowest thread priority level  0-15:普通线程优先级
+#define LOW_REALTIME_PRIORITY 16    // Lowest realtime priority level  16-31:实时线程优先级
 #define HIGH_PRIORITY 31            // Highest thread priority level
 #define MAXIMUM_PRIORITY 32         // Number of thread priority levels
 // begin_winnt

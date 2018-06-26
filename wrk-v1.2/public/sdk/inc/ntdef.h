@@ -1174,7 +1174,7 @@ typedef ANSI_STRING64 *PANSI_STRING64;
 // Valid values for the Attributes field
 //
 
-#define OBJ_INHERIT             0x00000002L
+#define OBJ_INHERIT             0x00000002L  // ¸Ã
 #define OBJ_PERMANENT           0x00000010L
 #define OBJ_EXCLUSIVE           0x00000020L
 #define OBJ_CASE_INSENSITIVE    0x00000040L
