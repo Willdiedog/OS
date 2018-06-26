@@ -22,7 +22,7 @@ Abstract:
 #pragma alloc_text(PAGE,ObInsertObject)
 #endif
 
-
+// 将对象添加到句柄表
 NTSTATUS
 ObInsertObject (
     __in PVOID Object,

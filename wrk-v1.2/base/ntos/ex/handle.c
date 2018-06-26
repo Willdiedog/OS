@@ -2054,7 +2054,7 @@ Return Value:
     //
     //  Translate the input handle to a handle table entry and make
     //  sure it is a valid handle.
-    //
+    //  »ñµÃ¾ä±úÏî
 
     HandleTableEntry = ExpLookupHandleTableEntry( HandleTable,
                                                   LocalHandle );
