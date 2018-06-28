@@ -1056,7 +1056,7 @@ Return Value:
     return( Status );
 }
 
-// 
+// 通过句柄获得对象
 NTSTATUS
 ObReferenceObjectByHandle (
     __in HANDLE Handle,
@@ -1125,7 +1125,7 @@ Return Value:
 
         if (Handle == NtCurrentProcess()) {
 
-            if ((ObjectType == PsProcessType) || (ObjectType == NULL)) {
+            if ((ObjectType == PsProcessType) || (ObjectType == NULL)) {  // Process类型
 
                 Process = PsGetCurrentProcessByThread(Thread);
                 GrantedAccess = Process->GrantedAccess;
@@ -1167,7 +1167,7 @@ Return Value:
         //  handle
         //
 
-        } else if (Handle == NtCurrentThread()) {
+        } else if (Handle == NtCurrentThread()) {  // 为当前线程
 
             if ((ObjectType == PsThreadType) || (ObjectType == NULL)) {
 
@@ -1185,7 +1185,7 @@ Return Value:
                     }
 
                     ObpIncrPointerCount(ObjectHeader);
-                    *Object = Thread;
+                    *Object = Thread;  // 返回当前线程对象
 
                     ASSERT( *Object != NULL );
 
@@ -1239,11 +1239,11 @@ Return Value:
     //  Translate the specified handle to an object table index.
     //
 
-    ObjectTableEntry = ExMapHandleToPointerEx ( HandleTable, Handle, AccessMode ); 
+    ObjectTableEntry = ExMapHandleToPointerEx ( HandleTable, Handle, AccessMode );  // 获得句柄对象
 
     //
     //  Make sure the object table entry really does exist
-    //
+    //  句柄对象的Object即为返回值
 
     if (ObjectTableEntry != NULL) {
 
@@ -1255,7 +1255,7 @@ Return Value:
         //
 
         ReadForWriteAccess(ObjectHeader);
-        if ((ObjectHeader->Type == ObjectType) || (ObjectType == NULL)) {
+        if ((ObjectHeader->Type == ObjectType) || (ObjectType == NULL)) {  // 检查Object类型是否匹配
 
 #if i386 
             if (NtGlobalFlag & FLG_KERNEL_STACK_TRACE_DB) {

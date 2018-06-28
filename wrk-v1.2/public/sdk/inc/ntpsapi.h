@@ -164,8 +164,8 @@ typedef struct _PEB_FREE_BLOCK {
 //
 
 typedef struct _CLIENT_ID {
-    HANDLE UniqueProcess;  // UniqueProcessId
-    HANDLE UniqueThread;   // 线程在进程句柄表中的句柄
+    HANDLE UniqueProcess;  // UniqueProcessId PHANDLE_TABLE_ENTRY
+    HANDLE UniqueThread;   // 线程在进程句柄表中的句柄 PHANDLE_TABLE_ENTRY
 } CLIENT_ID;
 typedef CLIENT_ID *PCLIENT_ID;
 

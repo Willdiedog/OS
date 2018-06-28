@@ -1313,7 +1313,7 @@ typedef struct _KPRCB {
     UCHAR NestingLevel;
     BOOLEAN InterruptRequest;
     BOOLEAN IdleHalt;
-    struct _KTHREAD *CurrentThread;
+    struct _KTHREAD *CurrentThread;  // 当前线程指针
     struct _KTHREAD *NextThread;
     struct _KTHREAD *IdleThread;
     ULONG64 UserRsp;

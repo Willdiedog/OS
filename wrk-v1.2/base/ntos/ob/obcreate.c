@@ -973,6 +973,7 @@ Return Value:
         PoolType = PagedPool;
     }
 
+	// 申请HeaderSize + ObjectBodySize大小的内存空间
     ObjectHeader = ExAllocatePoolWithTag( PoolType,
                                           HeaderSize + ObjectBodySize,
                                           (ObjectType == NULL ? 'TjbO' : ObjectType->Key) |
@@ -987,9 +988,9 @@ Return Value:
     //  Now based on if we are to put in the quota, handle, name, or creator info we
     //  will do the extra work.  This order is very important because we rely on
     //  it to free the object.
-    //
+    //  向ObjectHeader指向的缓存写入数据
 
-    if (QuotaInfoSize != 0) {
+    if (QuotaInfoSize != 0) {  // 
 
         QuotaInfo = (POBJECT_HEADER_QUOTA_INFO)ObjectHeader;
         QuotaInfo->PagedPoolCharge = ObjectCreateInfo->PagedPoolCharge;

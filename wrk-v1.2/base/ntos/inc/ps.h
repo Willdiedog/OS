@@ -260,7 +260,7 @@ typedef struct _EPROCESS {
 
     EX_RUNDOWN_REF RundownProtect;  // 进程停止保护锁  
 
-    HANDLE UniqueProcessId; // 进程ID
+    HANDLE UniqueProcessId; // 进程ID  PHANDLE_TABLE_ENTRY
 
     //
     // Global list of all processes in the system. Processes are removed
@@ -1035,7 +1035,7 @@ extern ULONG PsRawPrioritySeparation;
 extern LIST_ENTRY PsActiveProcessHead;
 extern const UNICODE_STRING PsNtDllPathName;
 extern PVOID PsSystemDllBase;
-extern PEPROCESS PsInitialSystemProcess;
+extern PEPROCESS PsInitialSystemProcess;  // 所有系统进程的父进程
 extern PVOID PsNtosImageBase;
 extern PVOID PsHalImageBase;
 

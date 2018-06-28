@@ -190,7 +190,7 @@ Return Value:
     //
     //  Since we took the handle away we need to decrement the objects
     //  handle count, and remove a reference
-    //
+    //  句柄结束对Object的引用
 
     ObpDecrementHandleCount( PsGetCurrentProcess(),
                              ObjectHeader,

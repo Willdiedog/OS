@@ -1145,7 +1145,7 @@ PspUnlockWorkingSetChangeExclusiveUnsafe (
 //
 
 extern PHANDLE_TABLE PspCidTable;
-extern HANDLE PspInitialSystemProcessHandle;
+extern HANDLE PspInitialSystemProcessHandle; // 
 extern PACCESS_TOKEN PspBootAccessToken;
 extern SYSTEM_DLL PspSystemDll;
 extern PETHREAD PspShutdownThread;

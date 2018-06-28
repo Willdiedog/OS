@@ -39,7 +39,7 @@ ULONG PsPrioritySeparation; // nonpaged
 BOOLEAN PspUseJobSchedulingClasses = FALSE;
 PACCESS_TOKEN PspBootAccessToken = NULL;
 HANDLE PspInitialSystemProcessHandle = NULL;
-PHANDLE_TABLE PspCidTable; // nonpaged
+PHANDLE_TABLE PspCidTable; // nonpaged  全局句柄表  Cid句柄  Client ID handle table
 SYSTEM_DLL PspSystemDll = {NULL};
 #ifdef ALLOC_DATA_PRAGMA
 #pragma const_seg("INITCONST")
@@ -140,6 +140,7 @@ LIST_ENTRY PsActiveProcessHead;
 PEPROCESS PsIdleProcess;
 PETHREAD PspShutdownThread;
 
+// 系统初始化
 BOOLEAN
 PsInitSystem (
     IN ULONG Phase,
@@ -290,7 +291,7 @@ Return Value:
 
     //
     // Initialize active process list head and mutex
-    //
+    // 
 
     InitializeListHead (&PsActiveProcessHead);
 

@@ -2599,7 +2599,7 @@ Return Value:
     //
     //  ObpIncrementHandleCount will perform access checking on the
     //  object being opened as appropriate.
-    //
+    //  句柄引用了Object，给Object增加引用计数
 
     Status = ObpIncrementHandleCount( OpenReason,
                                       PsGetCurrentProcess(),
@@ -2743,19 +2743,19 @@ Return Value:
 
     ObpEncodeProtectClose(ObjectTableEntry);
 
-    NewHandle = ExCreateHandle( ObjectTable, &ObjectTableEntry );
+    NewHandle = ExCreateHandle( ObjectTable, &ObjectTableEntry );  // 创建句柄表项
 
     //
     //  If we didn't get a handle then cleanup after ourselves and return
     //  the error to our caller
-    //
+    //  
 
     if (NewHandle == NULL) {
 
         ObpDecrementHandleCount( PsGetCurrentProcess(),
                                  ObjectHeader,
                                  ObjectType,
-                                 GrantedAccess );
+                                 GrantedAccess );  // 句柄结束对Object的引用
 
         if (ARGUMENT_PRESENT( ObjectPointerBias )) {
 

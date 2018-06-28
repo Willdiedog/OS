@@ -1070,6 +1070,7 @@ typedef struct _KDPC_DATA {
 #define PRCB_BUILD_DEBUG        0x0001
 #define PRCB_BUILD_UNIPROCESSOR 0x0002
 
+// 处理器控制块 Processor Control Block
 typedef struct _KPRCB {
 
 //
@@ -1080,7 +1081,7 @@ typedef struct _KPRCB {
     USHORT MinorVersion;
     USHORT MajorVersion;
 
-    struct _KTHREAD *CurrentThread;
+    struct _KTHREAD *CurrentThread; // 当前线程指针
     struct _KTHREAD *NextThread;
     struct _KTHREAD *IdleThread;
 
@@ -1442,7 +1443,7 @@ typedef struct _KPCR {
     ULONG   InterruptMode;
     UCHAR   Spare1;
     ULONG   KernelReserved2[17];
-    struct _KPRCB PrcbData;
+    struct _KPRCB PrcbData; // 处理器控制块
 
 // begin_nthal begin_ntddk begin_ntosp
 
@@ -2741,8 +2742,9 @@ KeGetCurrentProcessorNumber(VOID)
 // they must call the kernel function KeGetCurrentThread.
 // WARNING: This inline macro is always MP enabled because filesystems
 // utilize it
-//
-//
+// 
+// fs寄存器指向处理器控制区(PCR, Processor Control Region)的内存，该内存结构为KPCR
+// 
 FORCEINLINE
 struct _KTHREAD *
 NTAPI KeGetCurrentThread (VOID)

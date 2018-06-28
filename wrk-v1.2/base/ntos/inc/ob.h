@@ -417,7 +417,7 @@ typedef struct _OBJECT_CREATE_INFORMATION {
 typedef struct _OBJECT_CREATE_INFORMATION *POBJECT_CREATE_INFORMATION;;
 
 typedef struct _OBJECT_HEADER {
-    LONG_PTR PointerCount;
+    LONG_PTR PointerCount;  // Object引用计数
     union {
         LONG_PTR HandleCount;
         PVOID NextToFree;
@@ -434,7 +434,7 @@ typedef struct _OBJECT_HEADER {
     };
 
     PSECURITY_DESCRIPTOR SecurityDescriptor;
-    QUAD Body;
+    QUAD Body;  // Object
 } OBJECT_HEADER, *POBJECT_HEADER;
 // end_ntosp
 

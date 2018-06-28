@@ -77,12 +77,12 @@ BOOLEAN PsImageNotifyEnabled = FALSE;
 NTSTATUS
 NtCreateThread(
     __out PHANDLE ThreadHandle,
-    __in ACCESS_MASK DesiredAccess,
-    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
-    __in HANDLE ProcessHandle,
+    __in ACCESS_MASK DesiredAccess,  // 访问权限
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes, // 线程对象属性
+    __in HANDLE ProcessHandle, // 进程句柄
     __out PCLIENT_ID ClientId,
-    __in PCONTEXT ThreadContext,
-    __in PINITIAL_TEB InitialTeb,
+    __in PCONTEXT ThreadContext, // 代表用户模式线程的初始执行环境
+    __in PINITIAL_TEB InitialTeb, // Teb初始值
     __in BOOLEAN CreateSuspended
     )
 
@@ -245,13 +245,13 @@ PspCreateThread(
     IN ACCESS_MASK DesiredAccess,
     IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
     IN HANDLE ProcessHandle,
-    IN PEPROCESS ProcessPointer,
+    IN PEPROCESS ProcessPointer, 
     OUT PCLIENT_ID ClientId OPTIONAL,
-    IN PCONTEXT ThreadContext OPTIONAL,
-    IN PINITIAL_TEB InitialTeb OPTIONAL,
+    IN PCONTEXT ThreadContext OPTIONAL,  // 用户线程
+    IN PINITIAL_TEB InitialTeb OPTIONAL,  // 用户线程
     IN BOOLEAN CreateSuspended,
-    IN PKSTART_ROUTINE StartRoutine OPTIONAL,
-    IN PVOID StartContext
+    IN PKSTART_ROUTINE StartRoutine OPTIONAL, // 系统线程
+    IN PVOID StartContext // 系统线程
     )
 
 /*++
@@ -288,7 +288,7 @@ Arguments:
 
     StartRoutine - Supplies the address of the system thread start routine.
 
-    StartContext - Supplies context for a system thread start routine.
+    StartContext - Supplies context for a system thread start routine. 系统线程启动函数的执行环境
 
 --*/
 
@@ -316,9 +316,10 @@ Arguments:
 
     PAGED_CODE();
 
-
+	// 获得当前线程
     CurrentThread = PsGetCurrentThread ();
 
+	// 用户模式or内核模式
     if (StartRoutine != NULL) {
         PreviousMode = KernelMode;
     } else {
@@ -341,7 +342,7 @@ Arguments:
                                             PROCESS_CREATE_THREAD,
                                             PsProcessType,
                                             PreviousMode,
-                                            &Process,
+                                            &Process,  // 获得进程对象
                                             NULL);
     } else {
         if (StartRoutine != NULL) {
@@ -375,7 +376,7 @@ Arguments:
                              sizeof(ETHREAD),
                              0,
                              0,
-                             &Thread);
+                             &Thread); // 创建线程对象 ETHREAD
 
     if (!NT_SUCCESS (Status)) {
         ObDereferenceObject (Process);
@@ -399,7 +400,7 @@ Arguments:
 
     CidEntry.Object = Thread;
     CidEntry.GrantedAccess = 0;
-    Thread->Cid.UniqueThread = ExCreateHandle (PspCidTable, &CidEntry);
+    Thread->Cid.UniqueThread = ExCreateHandle (PspCidTable, &CidEntry); // 在PspCidTable表中 创建句柄
 
     if (Thread->Cid.UniqueThread == NULL) {
         ObDereferenceObject (Thread);
@@ -407,32 +408,32 @@ Arguments:
     }
 
     //
-    // Initialize Mm
+    // Initialize Mm 初始化内存
     //
 
     Thread->ReadClusterSize = MmReadClusterSize;
 
     //
-    // Initialize LPC
+    // Initialize LPC  初始化LPC（Load Procedure Call）
     //
 
     KeInitializeSemaphore (&Thread->LpcReplySemaphore, 0L, 1L);
     InitializeListHead (&Thread->LpcReplyChain);
 
     //
-    // Initialize Io
+    // Initialize Io  初始IO
     //
 
     InitializeListHead (&Thread->IrpList);
 
     //
-    // Initialize Registry
+    // Initialize Registry 初始化注册表
     //
 
     InitializeListHead (&Thread->PostBlockList);
 
     //
-    // Initialize the thread lock
+    // Initialize the thread lock 初始化线程锁
     //
 
     PspInitializeThreadLock (Thread);
@@ -440,13 +441,13 @@ Arguments:
     KeInitializeSpinLock (&Thread->ActiveTimerListLock);
     InitializeListHead (&Thread->ActiveTimerListHead);
 
-
+	// 获取进程的RundownProtect锁，已避免在创建过程中，该进程被停掉
     if (!ExAcquireRundownProtection (&Process->RundownProtect)) {
         ObDereferenceObject (Thread);
         return STATUS_PROCESS_IS_TERMINATING;
     }
 
-    if (ARGUMENT_PRESENT (ThreadContext)) {
+    if (ARGUMENT_PRESENT (ThreadContext)) {  // ThreadContext非NULL，则此次创建的是用户模式线程
 
         //
         // User-mode thread. Create TEB etc
@@ -473,7 +474,7 @@ Arguments:
 
 #elif defined(_X86_)
 
-            Thread->Win32StartAddress = (PVOID)ThreadContext->Eax;
+            Thread->Win32StartAddress = (PVOID)ThreadContext->Eax;  // eax寄存器
 
 #else
 
@@ -900,15 +901,15 @@ Arguments:
     }
 
     if (ARGUMENT_PRESENT (ParentProcess)) {
-        Status = PspCreateProcess (ProcessHandle,
-                                   DesiredAccess,
-                                   ObjectAttributes,
-                                   ParentProcess,
-                                   Flags,
-                                   SectionHandle,
-                                   DebugPort,
-                                   ExceptionPort,
-                                   JobMemberLevel);
+        Status = PspCreateProcess (ProcessHandle,  // 要创建的进程句柄
+                                   DesiredAccess,  // 进程访问权限
+                                   ObjectAttributes, // 进程对象属性
+                                   ParentProcess,  // 父进程句柄
+                                   Flags,  // 如 PROCESS_CREATE_PROCESS-是否拷贝父进程句柄表，使子父进程句柄表值相同
+                                   SectionHandle,  // 进程的Image文件 调用者需要SECTION_MAP_EXECUTE访问权限
+                                   DebugPort, // 调用者需要PORT_WRITE、PORT_READ访问权限
+                                   ExceptionPort,  // 异常端口  调用者需要PORT_WRITE、PORT_READ访问权限
+                                   JobMemberLevel);  // 指定要创建的进程在一个Job集中的级别
     } else {
         Status = STATUS_INVALID_PARAMETER;
     }
@@ -916,7 +917,7 @@ Arguments:
     return Status;
 }
 
-
+// 创建系统进程对象
 NTSTATUS
 PsCreateSystemProcess(
     __out PHANDLE ProcessHandle,
@@ -1078,7 +1079,7 @@ Arguments:
                                             PROCESS_CREATE_PROCESS,
                                             PsProcessType,
                                             PreviousMode,
-                                            &Parent,
+                                            &Parent,  // 获得父进程对象的EPROCESS指针
                                             NULL);
         if (!NT_SUCCESS (Status)) {
             return Status;
@@ -1089,21 +1090,21 @@ Arguments:
             return STATUS_INVALID_PARAMETER;
         }
 
-        Affinity = Parent->Pcb.Affinity;
-        WorkingSetMinimum = PsMinimumWorkingSet;
-        WorkingSetMaximum = PsMaximumWorkingSet;
+        Affinity = Parent->Pcb.Affinity;  // 父进程占用的CPU
+        WorkingSetMinimum = PsMinimumWorkingSet;  // 工作集的最小值
+        WorkingSetMaximum = PsMaximumWorkingSet;  // 工作集的最大值
 
 
     } else {
 
         Parent = NULL;
-        Affinity = KeActiveProcessors;
+        Affinity = KeActiveProcessors;  // 设为系统中当前可用处理器
         WorkingSetMinimum = PsMinimumWorkingSet;
         WorkingSetMaximum = PsMaximumWorkingSet;
     }
 
     //
-    // Create the process object
+    // Create the process object  创建内核对象EPROCESS
     //
     Status = ObCreateObject (PreviousMode,
                              PsProcessType,
@@ -1154,7 +1155,7 @@ Arguments:
 
     //
     // Section
-    //
+    // SectionHandle:内存区句柄
 
     if (ARGUMENT_PRESENT (SectionHandle)) {
         Status = ObReferenceObjectByHandle (SectionHandle,
@@ -1287,10 +1288,10 @@ Arguments:
     PS_SET_BITS (&Process->Flags, PS_PROCESS_FLAGS_HAS_ADDRESS_SPACE);
     Process->Vm.MaximumWorkingSetSize = WorkingSetMaximum;
     KeInitializeProcess (&Process->Pcb,
-                         NORMAL_BASE_PRIORITY,
-                         Affinity,
-                         &DirectoryTableBase[0],
-                         (BOOLEAN)(Process->DefaultHardErrorProcessing & PROCESS_HARDERROR_ALIGNMENT_BIT));
+                         NORMAL_BASE_PRIORITY,    // 基本优先级
+                         Affinity,  
+                         &DirectoryTableBase[0],  // 进程页目录
+                         (BOOLEAN)(Process->DefaultHardErrorProcessing & PROCESS_HARDERROR_ALIGNMENT_BIT)); // 超空间的页帧号
 
     //
     //  Initialize the security fields of the process
@@ -1299,7 +1300,7 @@ Arguments:
     //  security context to duplicate for the new process.
     //
 
-    Status = PspInitializeProcessSecurity (Parent, Process);
+    Status = PspInitializeProcessSecurity (Parent, Process); // 初始化进程安全属性，从父进程复制一个令牌
     if (!NT_SUCCESS (Status)) {
         goto exit_and_deref;
     }
@@ -1308,7 +1309,7 @@ Arguments:
     if (Parent != NULL) {
         if (Parent->PriorityClass == PROCESS_PRIORITY_CLASS_IDLE ||
             Parent->PriorityClass == PROCESS_PRIORITY_CLASS_BELOW_NORMAL) {
-            Process->PriorityClass = Parent->PriorityClass;
+            Process->PriorityClass = Parent->PriorityClass;  // 拷贝父进程优先级
         }
 
         //
@@ -1334,7 +1335,7 @@ Arguments:
     Status = STATUS_SUCCESS;
     SavedStatus = STATUS_SUCCESS;
 
-    //
+    // 初始化进程的地址空间
     // Initialize the process address space
     // The address space has four possibilities
     //
@@ -1352,7 +1353,7 @@ Arguments:
     //          is initialized so that it maps the specified section.
     //
 
-    if (SectionHandle != NULL) {
+    if (SectionHandle != NULL) {  // 新的可执行映像(Image)内存区对象
 
         //
         // User Process (New Image Address Space). Don't specify Process to
@@ -1361,7 +1362,7 @@ Arguments:
         // Passing in the 4th parameter as below lets the EPROCESS struct contain its image file name, provided that
         // appropriate audit settings are enabled.  Memory is allocated inside of MmInitializeProcessAddressSpace
         // and pointed to by ImageFileName, so that must be freed in the process deletion routine (PspDeleteProcess())
-        //
+        // 根据指定的内存区对象，初始化进程地址空间
 
         Status = MmInitializeProcessAddressSpace (Process,
                                                   NULL,
@@ -1382,20 +1383,20 @@ Arguments:
         CreatePeb = TRUE;
         UseLargePages = ((Flags & PROCESS_CREATE_FLAGS_LARGE_PAGES) != 0 ? TRUE : FALSE);
 
-    } else if (Parent != NULL) {
-        if (Parent != PsInitialSystemProcess) {
+    } else if (Parent != NULL) {  // 没有指定映像内存区对象，但指定了父进程
+        if (Parent != PsInitialSystemProcess) {  // 父进程非系统进程
             Process->SectionBaseAddress = Parent->SectionBaseAddress;
 
             //
             // User Process ( Cloned Address Space ).  Don't specify section to
             // map, just Process to clone.
-            //
+            // 
 
             Status = MmInitializeProcessAddressSpace (Process,
                                                       Parent,
                                                       NULL,
                                                       &Flags,
-                                                      NULL);
+                                                      NULL);  // 根据父进程初始化进程地址空间
 
             if (!NT_SUCCESS (Status)) {
                 goto exit_and_deref;
@@ -1407,7 +1408,7 @@ Arguments:
             //
             // A cloned process isn't started from an image file, so we give it the name
             // of the process of which it is a clone, provided the original has a name.
-            //
+            // 拷贝父进程的映像名称到新进程对象
 
             if (Parent->SeAuditProcessCreationInfo.ImageFileName != NULL) {
                 ImageFileNameSize = sizeof(OBJECT_NAME_INFORMATION) +
@@ -1438,7 +1439,7 @@ Arguments:
                 }
             }
 
-        } else {
+        } else {   // 父进程是系统进程 
 
             //
             // System Process.  Don't specify Process to clone or section to map
@@ -1449,7 +1450,7 @@ Arguments:
                                                       NULL,
                                                       NULL,
                                                       &Flags,
-                                                      NULL);
+                                                      NULL); // 不指定内存区和父进程，直接初始化
 
             if (!NT_SUCCESS (Status)) {
                 goto exit_and_deref;
@@ -1458,7 +1459,7 @@ Arguments:
             //
             // In case the image file name of this system process is ever queried, we give
             // a zero length UNICODE_STRING.
-            //
+            // 拷贝映像名
 
             Process->SeAuditProcessCreationInfo.ImageFileName =
                 ExAllocatePoolWithTag (PagedPool,
@@ -1476,12 +1477,12 @@ Arguments:
     }
 
     //
-    // Create the process ID
+    // Create the process ID 
     //
 
     CidEntry.Object = Process;
     CidEntry.GrantedAccess = 0;
-    Process->UniqueProcessId = ExCreateHandle (PspCidTable, &CidEntry);
+    Process->UniqueProcessId = ExCreateHandle (PspCidTable, &CidEntry); // 创建进程ID
     if (Process->UniqueProcessId == NULL) {
         Status = STATUS_INSUFFICIENT_RESOURCES;
         goto exit_and_deref;
@@ -1490,7 +1491,7 @@ Arguments:
     ExSetHandleTableOwner (Process->ObjectTable, Process->UniqueProcessId);
 
     //
-    // Audit the process creation.
+    // Audit the process creation. 对此次进程创建行为进行审计
     //
 
     if (SeDetailedAuditingWithToken (NULL)) {
@@ -1504,7 +1505,7 @@ Arguments:
 
     if (Parent) {
         Job = Parent->Job;
-        if (Job != NULL && !(Job->LimitFlags & JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK)) {
+        if (Job != NULL && !(Job->LimitFlags & JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK)) {  // 如父进程属于一个作业对象，则也加入到父进程所在的作业中
             if (Flags&PROCESS_CREATE_FLAGS_BREAKAWAY) {
                 if (!(Job->LimitFlags & JOB_OBJECT_LIMIT_BREAKAWAY_OK)) {
                     Status = STATUS_ACCESS_DENIED;
@@ -1547,7 +1548,7 @@ Arguments:
         }
     }
 
-    if (Parent && CreatePeb) {
+    if (Parent && CreatePeb) {  
 
         //
         // For processes created w/ a section,
@@ -1562,7 +1563,7 @@ Arguments:
         InitialPeb.ImageUsesLargePages = (BOOLEAN) UseLargePages;
             
         if (SectionHandle != NULL) {
-            Status = MmCreatePeb (Process, &InitialPeb, &Process->Peb);
+            Status = MmCreatePeb (Process, &InitialPeb, &Process->Peb); // 创建PEB(Process Environment Block)
             if (!NT_SUCCESS (Status)) {
                 Process->Peb = NULL;
                 goto exit_and_deref;
@@ -1611,7 +1612,7 @@ Arguments:
     //
 
     PspLockProcessList (CurrentThread);
-    InsertTailList (&PsActiveProcessHead, &Process->ActiveProcessLinks);
+    InsertTailList (&PsActiveProcessHead, &Process->ActiveProcessLinks); // 加入到PsActiveProcessHead
     PspUnlockProcessList (CurrentThread);
     AccessState = NULL;
     if (!PsUseImpersonationToken) {
@@ -1634,14 +1635,14 @@ Arguments:
     // open by name. Open by ID is still disabled. Since its reachable
     // somebody might create a thread in the process and cause
     // rundown.
-    //
+    // 把新进程插入到当前进程的句柄表中
 
     Status = ObInsertObject (Process,
                              AccessState,
-                             DesiredAccess,
+                             DesiredAccess, // 进程的访问权限
                              1,     // bias the refcnt by one for future process manipulations
                              NULL,
-                             &LocalProcessHandle);
+                             &LocalProcessHandle);  // 创建句柄
 
     if (AccessState != NULL) {
         SeDeleteAccessState (AccessState);
@@ -1654,7 +1655,7 @@ Arguments:
     //
     // Compute the base priority and quantum reset values for the process and
     // set the memory priority.
-    //
+    // 计算基本优先级和时限重置值
 
     ASSERT(IsListEmpty(&Process->ThreadListHead) == TRUE);
 
@@ -1668,13 +1669,13 @@ Arguments:
     //
     // As soon as a handle to the process is accessible, allow the process to
     // be deleted.
-    //
+    // 
 
-    Process->GrantedAccess = PROCESS_TERMINATE;
-    if (Parent && Parent != PsInitialSystemProcess) {
+    Process->GrantedAccess = PROCESS_TERMINATE; // 设置进程访问权限
+    if (Parent && Parent != PsInitialSystemProcess) { // 有父进程，但父进程不是PsInitialSystemProcess
         Status = ObGetObjectSecurity (Process,
                                       &SecurityDescriptor,
-                                      &MemoryAllocated);
+                                      &MemoryAllocated); // 访问检查
 
         if (!NT_SUCCESS (Status)) {
             ObCloseHandle (LocalProcessHandle, PreviousMode);
@@ -1726,11 +1727,11 @@ Arguments:
                                    STANDARD_RIGHTS_ALL |
                                    PROCESS_SET_QUOTA);
 
-    } else {
+    } else {  // 是PsInitialSystemProcess,授予所有访问权限
         Process->GrantedAccess = PROCESS_ALL_ACCESS;
     }
 
-    KeQuerySystemTime (&Process->CreateTime);
+    KeQuerySystemTime (&Process->CreateTime); // 设置进程创建时间
     try {
         if (Peb != NULL && CurrentThread->Tcb.Teb != NULL) {
             ((PTEB)(CurrentThread->Tcb.Teb))->NtTib.ArbitraryUserPointer = Peb;
