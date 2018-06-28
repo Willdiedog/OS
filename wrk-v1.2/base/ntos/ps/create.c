@@ -487,7 +487,7 @@ Arguments:
             Status = GetExceptionCode();
         }
 
-        if (NT_SUCCESS (Status)) {
+        if (NT_SUCCESS (Status)) {  // 初始化线程
             Status = KeInitThread (&Thread->Tcb,
                                    NULL,
                                    PspUserThreadStartup,
@@ -499,19 +499,19 @@ Arguments:
        }
 
 
-    } else {
+    } else {  // 为系统线程
 
         Teb = NULL;
         //
-        // Set the system thread bit thats kept for all time
+        // Set the system thread bit thats kept for all time 设置系统线程位
         //
         PS_SET_BITS (&Thread->CrossThreadFlags, PS_CROSS_THREAD_FLAGS_SYSTEM);
 
         //
         // Initialize kernel thread object for kernel mode thread.
-        //
+        //  
 
-        Thread->StartAddress = (PKSTART_ROUTINE) StartRoutine;
+        Thread->StartAddress = (PKSTART_ROUTINE) StartRoutine; // 线程启动地址
         Status = KeInitThread (&Thread->Tcb,
                                NULL,
                                PspSystemThreadStartup,
@@ -532,14 +532,14 @@ Arguments:
         return Status;
     }
 
-    PspLockProcessExclusive (Process, CurrentThread);
+    PspLockProcessExclusive (Process, CurrentThread); // 锁住线程
     //
     // Process is exiting or has had delete process called
     // We check the calling threads termination status so we
     // abort any thread creates while ExitProcess is being called --
     // but the call is blocked only if the new thread would be created
     // in the terminating thread's process.
-    //
+    // 进程并不是在退出或终止过程中
     if ((Process->Flags&PS_PROCESS_FLAGS_PROCESS_DELETE) != 0 ||
         (((CurrentThread->CrossThreadFlags&PS_CROSS_THREAD_FLAGS_TERMINATED) != 0) &&
         (ThreadContext != NULL) &&
