@@ -40,7 +40,7 @@ BOOLEAN PspUseJobSchedulingClasses = FALSE;
 PACCESS_TOKEN PspBootAccessToken = NULL;
 HANDLE PspInitialSystemProcessHandle = NULL;
 PHANDLE_TABLE PspCidTable; // nonpaged  全局句柄表  Cid句柄  Client ID handle table
-SYSTEM_DLL PspSystemDll = {NULL};
+SYSTEM_DLL PspSystemDll = {NULL};  // 系统DLL文件
 #ifdef ALLOC_DATA_PRAGMA
 #pragma const_seg("INITCONST")
 #pragma data_seg("INITDATA")
@@ -867,7 +867,7 @@ Arguments:
     }
     //
     // Locate the important system dll entrypoints
-    //
+    // 设置DLL入口函数
 
     dll_entrypoint = "LdrInitializeThunk";
 

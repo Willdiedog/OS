@@ -1724,7 +1724,7 @@ typedef struct _KTRAP_FRAME {
 
     ULONG   ErrCode;
     ULONG   Eip;
-    ULONG   SegCs;
+    ULONG   SegCs;  // SegCs & MODE_MASK 内核模式or用户模式
     ULONG   EFlags;
 
     ULONG   HardwareEsp;    // WARNING - segSS:esp are only here for stacks

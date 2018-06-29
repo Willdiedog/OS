@@ -214,7 +214,7 @@ Return Value:
 
         //
         // Tell KiThreadStartup that a user context is present.
-        //
+        // KiThreadStartup Æô¶¯Ïß³Ì ASM:_KiThreadStartup
 
         *PUserContextFlag = 1;
 

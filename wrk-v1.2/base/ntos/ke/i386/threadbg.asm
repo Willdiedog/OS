@@ -62,7 +62,7 @@ _TEXT$00   SEGMENT DWORD PUBLIC 'CODE'
 ;
 ;    None.
 ;
-;--
+;-- 启动线程
 
 cPublicProc _KiThreadStartup    ,1
 
@@ -70,12 +70,12 @@ cPublicProc _KiThreadStartup    ,1
         xor     esi,esi             ;
         xor     edi,edi             ;
         xor     ebp,ebp             ;
-        LowerIrql APC_LEVEL         ; KeLowerIrql(APC_LEVEL)
+        LowerIrql APC_LEVEL         ; KeLowerIrql(APC_LEVEL) 将IRQL降低到APC_LEVEL
 
-        pop     eax                 ; (eax)->SystemRoutine
-        call    eax                 ; SystemRoutine(StartRoutine, StartContext)
+        pop     eax                 ; (eax)->SystemRoutine    StartRoutine的值为PspUserThreadStartup
+        call    eax                 ; SystemRoutine(StartRoutine, StartContext)  调用PspUserThreadStartup函数
 
-        pop     ecx                 ; (ecx) = UserContextFlag
+        pop     ecx                 ; (ecx) = UserContextFlag  返回到用户模式
         or      ecx, ecx
         jz      short kits10              ; No user context, go bugcheck
 

@@ -139,7 +139,7 @@ typedef struct _GETSETCONTEXT {
 
 typedef struct _SYSTEM_DLL {
     PVOID Section;
-    PVOID DllBase;
+    PVOID DllBase;  // Image文件数据头
     PKNORMAL_ROUTINE LoaderInitRoutine;
     EX_PUSH_LOCK DllLock;
 } SYSTEM_DLL, PSYSTEM_DLL;

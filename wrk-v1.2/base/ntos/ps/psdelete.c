@@ -201,15 +201,15 @@ Arguments:
 
         ASSERT (KeGetCurrentIrql() < APC_LEVEL);
 
-        PS_SET_BITS (&Thread->CrossThreadFlags, PS_CROSS_THREAD_FLAGS_TERMINATED);
+        PS_SET_BITS (&Thread->CrossThreadFlags, PS_CROSS_THREAD_FLAGS_TERMINATED); // 添加线程终止标签
 
-        PspExitThread (ExitStatus);
+        PspExitThread (ExitStatus);  // 退出线程
 
         //
         // Never Returns
         //
 
-    } else {
+    } else {  // 非当前线程，在该线程插入内核APC
         //
         // Cross thread deletion of system threads won't work.
         //
@@ -247,7 +247,7 @@ Arguments:
                              PspExitApcRundown,
                              PspExitNormalApc,
                              KernelMode,
-                             ULongToPtr (ExitStatus));
+                             ULongToPtr (ExitStatus)); // 创建内核APC，用于退出线程
 
             if (!KeInsertQueueApc (ExitApc, ExitApc, NULL, 2)) {
                 //

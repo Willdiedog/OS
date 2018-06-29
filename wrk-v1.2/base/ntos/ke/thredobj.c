@@ -157,7 +157,7 @@ Return Value:
 
 #else
 
-    Thread->ServiceTable = (PVOID)&KeServiceDescriptorTable[0];
+    Thread->ServiceTable = (PVOID)&KeServiceDescriptorTable[0];  // 线程服务表
 
 #endif
 
@@ -237,7 +237,7 @@ Return Value:
     Thread->StackLimit = (PVOID)((ULONG_PTR)KernelStack - KERNEL_STACK_SIZE);
 
     //
-    // Initialize the thread context.
+    // Initialize the thread context.  线程执行环境
     //
 
     try {

@@ -559,8 +559,8 @@ Arguments:
     }
 
 
-    OldActiveThreads = Process->ActiveThreads++;
-    InsertTailList (&Process->ThreadListHead, &Thread->ThreadListEntry);
+    OldActiveThreads = Process->ActiveThreads++;  // 进程的活动线程+1
+    InsertTailList (&Process->ThreadListHead, &Thread->ThreadListEntry); // 加入链表
 
     KeStartThread (&Thread->Tcb);
 
@@ -574,7 +574,7 @@ Arguments:
     //
 
 
-    if (OldActiveThreads == 0) {
+    if (OldActiveThreads == 0) { // 是进程的第一个线程，则触发该进程创建通知
         PERFINFO_PROCESS_CREATE (Process);
 
         if (PspCreateProcessNotifyRoutineCount != 0) {
@@ -606,7 +606,7 @@ Arguments:
     // in time
     //
     Job = Process->Job;
-    if (Job != NULL && Job->CompletionPort &&
+    if (Job != NULL && Job->CompletionPort &&  // 进程在一个作业中
         !(Process->JobStatus & (PS_JOB_STATUS_NOT_REALLY_ACTIVE|PS_JOB_STATUS_NEW_PROCESS_REPORTED))) {
 
         PS_SET_BITS (&Process->JobStatus, PS_JOB_STATUS_NEW_PROCESS_REPORTED);
@@ -629,7 +629,7 @@ Arguments:
 
     //
     // Notify registered callout routines of thread creation.
-    //
+    // 通知接收线程创建时间的回调例程
 
     if (PspCreateThreadNotifyRoutineCount != 0) {
         ULONG i;
@@ -652,13 +652,13 @@ Arguments:
 
     //
     // Reference count of thread is biased once for itself and once for the handle if we create it.
-    //
+    // 引用计数加2：当前线程的操作、要返回的线程的句柄
 
     ObReferenceObjectEx (Thread, 2);
 
     if (CreateSuspended) {
         try {
-            KeSuspendThread (&Thread->Tcb);
+            KeSuspendThread (&Thread->Tcb);  // 挂起线程
         } except ((GetExceptionCode () == STATUS_SUSPEND_COUNT_EXCEEDED)?
                      EXCEPTION_EXECUTE_HANDLER :
                      EXCEPTION_CONTINUE_SEARCH) {
@@ -695,6 +695,7 @@ Arguments:
         }
     }
 
+	// 加入进程句柄表
     Status = ObInsertObject (Thread,
                              AccessState,
                              DesiredAccess,
@@ -807,8 +808,8 @@ Arguments:
         Thread->GrantedAccess = THREAD_ALL_ACCESS;
     }
 
-    KeReadyThread (&Thread->Tcb);
-    ObDereferenceObject (Thread);
+    KeReadyThread (&Thread->Tcb);  // 线程进入就绪状态，准备马上执行
+    ObDereferenceObject (Thread); // 引用计数-1
 
     return Status;
 }
@@ -2047,7 +2048,7 @@ Return Value:
 
     //
     // See if we need to terminate early because of a error in the create path
-    //
+    // 创建出错，则终止本线程
     KillThread = FALSE;
     if ((Thread->CrossThreadFlags & PS_CROSS_THREAD_FLAGS_DEADTHREAD) != 0) {
         KillThread = TRUE;
@@ -2069,7 +2070,7 @@ Return Value:
 
     //
     // If the create worked then notify the debugger.
-    //
+    // 通知调试器
     if ((Thread->CrossThreadFlags&
          (PS_CROSS_THREAD_FLAGS_DEADTHREAD|PS_CROSS_THREAD_FLAGS_HIDEFROMDBG)) == 0) {
         DbgkCreateThread (Thread, StartContext);
@@ -2086,11 +2087,12 @@ Return Value:
 
         if (CCPF_IS_PREFETCHER_ENABLED()) {
 
-            //
+            // 
             // If this is the first thread we are starting up in this process,
             // prefetch the pages likely to be used when initializing the 
             // application into the system cache.
-            //
+            // 若这是进程的第一个线程，则判断系统是否支持应用程序存取的特性，如果是，
+			// 则通知缓存管理器，预取可执行映像文件的页面
 
             if ((Process->Flags & PS_PROCESS_FLAGS_LAUNCH_PREFETCHED) == 0) {
 
@@ -2102,7 +2104,7 @@ Return Value:
 
                         //
                         // Notify cache manager of this application launch.
-                        //
+                        // 通知缓存管理器，预取可执行映像文件的页面，即将该进程上次启动前10s内引用的页面直接读取到内存中
 
                         CcPfBeginAppLaunch(Process, Process->SectionObject);
                     }
@@ -2110,9 +2112,9 @@ Return Value:
             }
         }
 
-        //
+        // APC 异步过程调用
         // Queue the initial APC to the thread
-        //
+        // 初始化用户模式APC到线程的用户APC队列中
 
         KeRaiseIrql (APC_LEVEL, &OldIrql);
 
@@ -2120,14 +2122,14 @@ Return Value:
                              PspGetBaseTrapFrame (Thread),
                              PspSystemDll.LoaderInitRoutine,
                              NULL,
-                             PspSystemDll.DllBase,
+                             PspSystemDll.DllBase, // 
                              NULL);
 
         KeLowerIrql (PASSIVE_LEVEL);
     }
 
     //
-    // Fill in the system wide cookie if its zero
+    // Fill in the system wide cookie if its zero  填充系统范围的一个Cookie值
     //
     while (1) {
         ULONG Cookie;

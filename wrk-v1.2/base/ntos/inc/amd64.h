@@ -2287,7 +2287,7 @@ typedef struct _KTRAP_FRAME {
 //      are not saved for system calls.
 //
 
-    ULONG64 Rax;
+    ULONG64 Rax;  // RAX-64  EAX-32
     ULONG64 Rcx;
     ULONG64 Rdx;
     ULONG64 R8;

@@ -35,11 +35,13 @@ KiInitializeUserApc (
     IN PVOID SystemArgument2
     )
 
-/*++
+/*++  
 
 Routine Description:
 
-    This function is called to initialize the context for a user mode APC.
+    This function is called to initialize the context for a user mode APC. 
+
+	 初始化用户模式的异步过程调用(APC)到线程的用户APC队列中
 
 Arguments:
 

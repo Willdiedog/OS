@@ -243,7 +243,7 @@ Return Value:
         MappedAsImage = FALSE;
         }
 
-    NtHeaders = RtlImageNtHeader(Base);
+    NtHeaders = RtlImageNtHeader(Base); // 从Image文件读取NtHeader
 
     if (!NtHeaders)
         return NULL;

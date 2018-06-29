@@ -2001,8 +2001,8 @@ CreateSystemRootLink(
 
 NTSTATUS
 LookupEntryPoint (
-    IN PVOID DllBase,
-    IN PSZ NameOfEntryPoint,
+    IN PVOID DllBase,  // 指向Image数据头
+    IN PSZ NameOfEntryPoint,  // 入口函数名
     OUT PVOID *AddressOfEntryPoint
     )
 /*++

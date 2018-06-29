@@ -356,7 +356,7 @@ typedef struct PEBTEB_STRUCT(_TEB) {
     BOOLEAN SafeThunkCall;
     BOOLEAN BooleanSpare [3];
     
-} PEBTEB_STRUCT(TEB), *PEBTEB_STRUCT(PTEB);
+} PEBTEB_STRUCT(TEB), *PEBTEB_STRUCT(PTEB); //  线程环境块 Thread Env Block
 
 #undef PEBTEB_POINTER
 #undef PEBTEB_STRUCT
