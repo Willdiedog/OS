@@ -866,18 +866,18 @@ Return Value:
     //
     // Its time to start turning off various cross thread references.
     // Mark the thread as rundown and wait for accessors to exit.
-    //
+    // 关闭跨线程引用
     ExWaitForRundownProtectionRelease (&Thread->RundownProtect);
 
     //
     // Clear any execution state associated with the thread
-    //
+    // 
 
     PoRundownThread(Thread);
 
     //
     // Notify registered callout routines of thread deletion.
-    //
+    // 执行线程删除回调
 
     PERFINFO_THREAD_DELETE(Thread);
 
@@ -906,9 +906,9 @@ Return Value:
 
     //
     // Say one less active thread. If we are the last then block creates and wait for the other threads to exit.
-    //
+    // 
     Process->ActiveThreads--;
-    if (Process->ActiveThreads == 0) {
+    if (Process->ActiveThreads == 0) {  // 活动线程为0，可以释放
         PS_SET_BITS (&Process->Flags, PS_PROCESS_FLAGS_PROCESS_DELETE);
 
         LastThread = TRUE;
@@ -922,7 +922,7 @@ Return Value:
 
         //
         // We are the last thread to leave the process. We have to wait till all the other threads have exited before we do.
-        //
+        // 有其它线程引用本线程，创建线程的异步延迟释放
         for (Entry = Process->ThreadListHead.Flink;
              Entry != &Process->ThreadListHead;
              Entry = Entry->Flink) {
@@ -962,7 +962,7 @@ Return Value:
 
     //
     // If we need to send debug messages then do so.
-    //
+    // 发送调试信息
 
     if (Process->DebugPort != NULL) {
         //
@@ -1107,10 +1107,10 @@ Return Value:
     //      - Perform kernel thread rundown
     //
 
-    IoCancelThreadIo (Thread);
-    ExTimerRundown ();
-    CmNotifyRunDown (Thread);
-    KeRundownThread ();
+    IoCancelThreadIo (Thread); // IO
+    ExTimerRundown (); // Timer
+    CmNotifyRunDown (Thread); // 未完成的注册表通知请求
+    KeRundownThread (); // 释放当前线程突变体内核对象(mutant)
 
 #if DBG
 
@@ -1127,7 +1127,7 @@ Return Value:
     // space, then this is a real user mode TEB.  If the address is in
     // system space, then this is a special system thread TEB allocated
     // from paged or nonpaged pool.
-    //
+    // 删除线程环境块内存
 
 
     Teb = Thread->Tcb.Teb;
@@ -1192,7 +1192,7 @@ Return Value:
     //
     // Let LPC component deal with message stack in Thread->LpcReplyMessage
     // but do it after the client ID becomes invalid.
-    //
+    // LPC组件处理LPC应答消息
 
     LpcExitThread (Thread);
 
@@ -1202,7 +1202,7 @@ Return Value:
 
     ASSERT (Thread->Tcb.CombinedApcDisable == 0);
 
-    if (LastThread) {
+    if (LastThread) {  // 进程的最后一线程，进程退出
 
         Process->ExitTime = Thread->ExitTime;
         PspExitProcess (TRUE, Process);
@@ -1264,13 +1264,13 @@ Return Value:
     // At this point we may have been frozen and the APC is pending. First we remove the suspend/freeze bias that
     // may exist and then drop IRQL. The suspend APC if present will fire and drop through. No further suspends are
     // allowed as the thread is marked to prevent APC's
-    //
+    // 强制恢复线程运行，以便处理可能有的APC  
     KeForceResumeThread (&Thread->Tcb);
     KeLeaveCriticalRegionThread (&Thread->Tcb);
 
     //
     // flush user-mode APC queue
-    //
+    // 遍历APC表，如有终止函数，则执行此函数，否则直接扔掉此APC
 
     FirstEntry = KeFlushQueueApc (&Thread->Tcb, UserMode);
 
@@ -1296,7 +1296,7 @@ Return Value:
     }
 
     if (LastThread) {
-        MmCleanProcessAddressSpace (Process);
+        MmCleanProcessAddressSpace (Process); // 清除进程地址空间
     }
 
     if (Thread->Tcb.BBTData && PspBBTNotifyRoutine) {
