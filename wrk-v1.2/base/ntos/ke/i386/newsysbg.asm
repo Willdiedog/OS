@@ -171,7 +171,7 @@ KissPbNumber            equ     [ebp-24]
 KissIdleStack           equ     [ebp-28]
 KissIdleThread          equ     [ebp-32]
 
-cPublicProc _KiSystemStartup        ,1
+cPublicProc _KiSystemStartup        ,1   ;内核入口汇编函数__KiSystemStartup
 
         push    ebp
         mov     ebp, esp
@@ -356,7 +356,7 @@ cPublicProc _KiSystemStartup        ,1
 ;
 ; set up PCR: Teb, Prcb pointers.  The PCR:InitialStack, and various fields
 ; of Prcb will be set up in _KiInitializeKernel
-;
+; 
 
         mov     dword ptr PCR[PcTeb], 0   ; PCR->Teb = 0
 
@@ -536,7 +536,7 @@ endif   ; DEVL
 ; arg1 - addr of current process obj
 
 ; initialize system data structures
-; and HAL.
+; and HAL.    调用KiInitializeKernel完成内核层的初始化
 
         stdCall    _KiInitializeKernel,<offset _KiInitialProcess,ebx,edx,dword ptr PCR[PcPrcb],eax,_KeLoaderBlock>
 

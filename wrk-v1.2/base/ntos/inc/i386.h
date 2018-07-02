@@ -1347,7 +1347,7 @@ typedef struct _KPRCB {
 
 // begin_nthal begin_ntosp
 
-} KPRCB, *PKPRCB, *RESTRICTED_POINTER PRKPRCB;
+} KPRCB, *PKPRCB, *RESTRICTED_POINTER PRKPRCB;  // ´¦ÀíÆ÷¿ØÖÆ¿é
 
 // end_nthal end_ntosp
 

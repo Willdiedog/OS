@@ -1295,7 +1295,7 @@ Return Value:
         } while (Entry != FirstEntry);
     }
 
-    if (LastThread) {
+    if (LastThread) { 
         MmCleanProcessAddressSpace (Process); // 清除进程地址空间
     }
 

@@ -112,7 +112,7 @@ const GENERIC_MAPPING PspJobMapping = {
 
 POBJECT_TYPE PsThreadType;
 POBJECT_TYPE PsProcessType;
-PEPROCESS PsInitialSystemProcess;
+PEPROCESS PsInitialSystemProcess;  // System进程 ID=4
 PVOID PsSystemDllDllBase;
 ULONG PspDefaultPagedLimit;
 ULONG PspDefaultNonPagedLimit;
@@ -176,7 +176,7 @@ Return Value:
     switch (InitializationPhase) {
 
     case 0 :
-        return PspInitPhase0(LoaderBlock);
+        return PspInitPhase0(LoaderBlock);  // 全局初始化  空闲线程初始化
     case 1 :
         return PspInitPhase1(LoaderBlock);
     default:
@@ -503,7 +503,7 @@ Return Value:
     if (!NT_SUCCESS (PsCreateSystemThread (&ThreadHandle,
                                            THREAD_ALL_ACCESS,
                                            &ObjectAttributes,
-                                           0L,
+                                           0L,  // 没指定父进程，则为System进程
                                            NULL,
                                            Phase1Initialization,
                                            (PVOID)LoaderBlock))) {

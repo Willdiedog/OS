@@ -1052,7 +1052,7 @@ extern LCID PsDefaultSystemLocaleId;
 extern LCID PsDefaultThreadLocaleId;
 extern LANGID PsDefaultUILanguageId;
 extern LANGID PsInstallUILanguageId;
-extern PEPROCESS PsIdleProcess;
+extern PEPROCESS PsIdleProcess;  // ¿ÕÏÐ½ø³Ì  ID=0
 extern SINGLE_LIST_ENTRY PsReaperListHead;
 extern WORK_QUEUE_ITEM PsReaperWorkItem;
 

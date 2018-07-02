@@ -388,16 +388,16 @@ typedef enum _KPROCESS_STATE {
 //
 
 typedef enum _KTHREAD_STATE {
-    Initialized,
-    Ready,
+    Initialized,  // 已初始化，未加入进程的线程列表中
+    Ready,  // 加入就绪线程链表中, 等待被调度
     Running,
-    Standby,
-    Terminated,
-    Waiting,
-    Transition,
-    DeferredReady,
-    GateWait
-} KTHREAD_STATE;
+    Standby,  // 备用状态  即将被执行的线程  每个处理器，只有一个备用线程   但可以被更高优先级的线程抢占
+    Terminated,  // 线程已完成任务  等待回收资源
+    Waiting,  // 线程等待  满足条件时，线程开始运行，或回到就绪状态
+    Transition,  // 线程转移  已准备好运行，但它的内核栈不在内存中，一旦内核栈被换入内存，线程进入就绪状态
+    DeferredReady, // 已经准备运行，未确定在哪个CPU上运行，为多处理器二引入
+    GateWait  
+} KTHREAD_STATE;  // 线程状态
 
 // begin_ntddk begin_wdm begin_nthal begin_ntifs begin_ntosp
 //
@@ -1310,12 +1310,12 @@ typedef struct _KTHREAD {
         KAPC SuspendApc;  // 线程挂起操作  Suspend
         struct {
             UCHAR SuspendApcFill0[KAPC_OFFSET_TO_SPARE_BYTE0];
-            SCHAR Quantum;
+            SCHAR Quantum;  // CPU处理时间片  线程的当前时限还剩多少时间单位
         };
 
         struct {
             UCHAR SuspendApcFill1[KAPC_OFFSET_TO_SPARE_BYTE1];
-            UCHAR QuantumReset;
+            UCHAR QuantumReset; // 线程时限重置值   一个完整时限的时间单位
         };
 
         struct {

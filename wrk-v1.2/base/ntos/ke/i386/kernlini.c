@@ -672,7 +672,7 @@ Return Value:
                             (KPRIORITY)0,
                             (KAFFINITY)(0xffffffff),
                             &DirectoryTableBase[0],
-                            FALSE);
+                            FALSE); // 初始化空闲进程 ID为0
 
         Process->QuantumReset = MAXCHAR;
 

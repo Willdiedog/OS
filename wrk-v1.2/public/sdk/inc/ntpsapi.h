@@ -397,13 +397,13 @@ typedef struct _INITIAL_TEB {
 } INITIAL_TEB, *PINITIAL_TEB;
 
 // 进程优先级  PROCESS.PriorityClass
-#define PROCESS_PRIORITY_CLASS_UNKNOWN      0
-#define PROCESS_PRIORITY_CLASS_IDLE         1  // 空闲
-#define PROCESS_PRIORITY_CLASS_NORMAL       2  // 普通
-#define PROCESS_PRIORITY_CLASS_HIGH         3  // 高
-#define PROCESS_PRIORITY_CLASS_REALTIME     4  // 实时
-#define PROCESS_PRIORITY_CLASS_BELOW_NORMAL 5  // 普通之下
-#define PROCESS_PRIORITY_CLASS_ABOVE_NORMAL 6  // 普通之上
+#define PROCESS_PRIORITY_CLASS_UNKNOWN      0  //        8
+#define PROCESS_PRIORITY_CLASS_IDLE         1  // 空闲   4
+#define PROCESS_PRIORITY_CLASS_NORMAL       2  // 普通   8
+#define PROCESS_PRIORITY_CLASS_HIGH         3  // 高     13
+#define PROCESS_PRIORITY_CLASS_REALTIME     4  // 实时   24
+#define PROCESS_PRIORITY_CLASS_BELOW_NORMAL 5  // 普通之下 6
+#define PROCESS_PRIORITY_CLASS_ABOVE_NORMAL 6  // 普通之上 10
 
 typedef struct _PROCESS_PRIORITY_CLASS {
     BOOLEAN Foreground;

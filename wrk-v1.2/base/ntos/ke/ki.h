@@ -215,7 +215,7 @@ Return Value:
     SCHAR Priority;
 
     //
-    // Compute the new thread priority.
+    // Compute the new thread priority
     //
 
     ASSERT((Thread->PriorityDecrement >= 0) && (Thread->PriorityDecrement <= Thread->Priority));
@@ -223,7 +223,7 @@ Return Value:
     ASSERT((Thread->Priority < LOW_REALTIME_PRIORITY) ? TRUE : (Thread->PriorityDecrement == 0));
 
     Priority = Thread->Priority;
-    if (Priority < LOW_REALTIME_PRIORITY) {
+    if (Priority < LOW_REALTIME_PRIORITY) {  // 低于实时优先级的线程，才进行优先级调整
         Priority = Priority - Thread->PriorityDecrement - Adjustment;
         if (Priority < Thread->BasePriority) {
             Priority = Thread->BasePriority;
@@ -2455,7 +2455,7 @@ Return Value:
     PKPRCB Prcb;
 
     Prcb = KeGetCurrentPrcb();
-    Thread->State = DeferredReady;
+    Thread->State = DeferredReady;  // 延迟就绪状态
     Thread->DeferredProcessor = Prcb->Number;
     PushEntryList(&Prcb->DeferredReadyListHead,
                   &Thread->SwapListEntry);
@@ -3480,7 +3480,7 @@ extern KNODE KiNode0;
 extern KNODE KiNodeInit[];
 extern LIST_ENTRY KiProcessListHead;
 extern ALIGNED_SPINLOCK KiProcessListLock;
-extern SINGLE_LIST_ENTRY KiProcessInSwapListHead;
+extern SINGLE_LIST_ENTRY KiProcessInSwapListHead; // 交换线程
 extern SINGLE_LIST_ENTRY KiProcessOutSwapListHead;
 extern SINGLE_LIST_ENTRY KiStackInSwapListHead;
 extern LIST_ENTRY KiProfileSourceListHead;

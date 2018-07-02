@@ -933,21 +933,22 @@ Return Value:
     //
 
     Process = Thread->ApcState.Process;
-    if (Process->State != ProcessInMemory) {
-        Thread->State = Ready;
+    if (Process->State != ProcessInMemory) { // 进程不在内存(已被换出）
+        Thread->State = Ready; // 线程就绪
         Thread->ProcessReadyQueue = TRUE;
-        InsertTailList(&Process->ReadyListHead, &Thread->WaitListEntry);
+        InsertTailList(&Process->ReadyListHead, &Thread->WaitListEntry); // 加入到进程就绪链表中
         if (Process->State == ProcessOutOfMemory) {
+			// 通知交换线程KiSwappingThread执行换入操作，线程状态设置为就绪状态
             Process->State = ProcessInTransition;
             InterlockedPushEntrySingleList(&KiProcessInSwapListHead,
                                            &Process->SwapListEntry);
 
-            KiSetInternalEvent(&KiSwapEvent, KiSwappingThread);
+            KiSetInternalEvent(&KiSwapEvent, KiSwappingThread); 
         }
 
         return;
 
-    } else if (Thread->KernelStackResident == FALSE) {
+    } else if (Thread->KernelStackResident == FALSE) {  // 线程内核栈不在内存
 
         //
         // The thread's kernel stack is not resident. Increment the process
@@ -958,13 +959,15 @@ Return Value:
 
         ASSERT(Process->StackCount != MAXULONG_PTR);
 
-        Process->StackCount += 1;
+        Process->StackCount += 1; // 进程的栈计数+1
 
         ASSERT(Thread->State != Transition);
 
-        Thread->State = Transition;
+        Thread->State = Transition; // 线程设为转移状态
+
+		// 线程插入到内核栈的线程链表中  通知交换线程执行换入操作
         InterlockedPushEntrySingleList(&KiStackInSwapListHead,
-                                       &Thread->SwapListEntry);
+                                       &Thread->SwapListEntry);  
 
         KiSetInternalEvent(&KiSwapEvent, KiSwappingThread);
         return;
@@ -973,7 +976,7 @@ Return Value:
 
         //
         // Insert the specified thread in the deferred ready list.
-        //
+        // 把指定的线程插入到延迟就绪链表中
 
         KiInsertDeferredReadyList(Thread);
         return;

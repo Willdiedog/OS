@@ -40,7 +40,7 @@ BOOLEAN PsWatchEnabled = FALSE;
 #ifdef ALLOC_DATA_PRAGMA
 #pragma const_seg("PAGECONST")
 #endif
-const KPRIORITY PspPriorityTable[PROCESS_PRIORITY_CLASS_ABOVE_NORMAL+1] = {8,4,8,13,24,6,10};
+const KPRIORITY PspPriorityTable[PROCESS_PRIORITY_CLASS_ABOVE_NORMAL+1] = {8,4,8,13,24,6,10}; // 指定优先级
 
 
 NTSTATUS
