@@ -375,12 +375,12 @@ typedef enum _KINTERRUPT_MODE {
 //
 
 typedef enum _KPROCESS_STATE {
-    ProcessInMemory,
-    ProcessOutOfMemory,
-    ProcessInTransition,
-    ProcessOutTransition,
-    ProcessInSwap,
-    ProcessOutSwap
+    ProcessInMemory,	  // 已在内存中
+    ProcessOutOfMemory,   // 不在物理内存
+    ProcessInTransition,  // 不在内存，但已申请换入
+    ProcessOutTransition, // 在内存，但已申请换出
+    ProcessInSwap,		  // 正在换入内存
+    ProcessOutSwap		  // 正在换出内存
 } KPROCESS_STATE;
 
 //
@@ -388,16 +388,16 @@ typedef enum _KPROCESS_STATE {
 //
 
 typedef enum _KTHREAD_STATE {
-    Initialized,  // 已初始化，未加入进程的线程列表中
-    Ready,  // 加入就绪线程链表中, 等待被调度
+    Initialized,	// 已初始化，未加入进程的线程列表中
+    Ready,			// 加入就绪线程链表中, 等待被调度
     Running,
-    Standby,  // 备用状态  即将被执行的线程  每个处理器，只有一个备用线程   但可以被更高优先级的线程抢占
+    Standby,      // 备用状态  即将被执行的线程  每个处理器，只有一个备用线程   但可以被更高优先级的线程抢占
     Terminated,  // 线程已完成任务  等待回收资源
-    Waiting,  // 线程等待  满足条件时，线程开始运行，或回到就绪状态
+    Waiting,     // 线程等待  满足条件时，线程开始运行，或回到就绪状态
     Transition,  // 线程转移  已准备好运行，但它的内核栈不在内存中，一旦内核栈被换入内存，线程进入就绪状态
-    DeferredReady, // 已经准备运行，未确定在哪个CPU上运行，为多处理器二引入
+    DeferredReady, // 已经准备运行，未确定在哪个CPU上运行，为多处理器而引入
     GateWait  
-} KTHREAD_STATE;  // 线程状态
+} KTHREAD_STATE;   // 线程状态
 
 // begin_ntddk begin_wdm begin_nthal begin_ntifs begin_ntosp
 //
@@ -1113,7 +1113,7 @@ typedef struct _KTHREAD {
 
     LONG_PTR WaitStatus;
     union {
-        PKWAIT_BLOCK WaitBlockList;  // 该线程正在等待的分发器对象列表
+        PKWAIT_BLOCK WaitBlockList;  // 该线程正在等待的分发器对象列表  线程等待分发器
         PKGATE GateObject;  // 门对象？
     };
 
@@ -1254,7 +1254,7 @@ typedef struct _KTHREAD {
     //
 
     UCHAR ApcStateIndex; // 当前APC在ApcStatePointer中的索引
-    UCHAR IdealProcessor;
+    UCHAR IdealProcessor; // 理想处理器ID
     BOOLEAN Preempted;  // TRUE: 已被高优先级线程抢占 
     BOOLEAN ProcessReadyQueue;  // 是否在进程的线程列表中ThreadListHead
 
@@ -4583,7 +4583,7 @@ extern USHORT KeProcessorRevision;
 extern ULONG KeFeatureBits;
 extern ALIGNED_SPINLOCK KiDispatcherLock;
 extern ULONG KiDPCTimeout;
-extern PKPRCB KiProcessorBlock[];
+extern PKPRCB KiProcessorBlock[]; // 处理器控制块数组
 extern ULONG KiSpinlockTimeout;
 extern ULONG KiStackProtectTime;
 extern KTHREAD_SWITCH_COUNTERS KeThreadSwitchCounters;

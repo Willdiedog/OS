@@ -395,7 +395,7 @@ Return Value:
 
         Entry = Queue->EntryListHead.Flink;
         if ((Entry != &Queue->EntryListHead) &&
-            (Queue->CurrentCount < Queue->MaximumCount)) {
+            (Queue->CurrentCount < Queue->MaximumCount)) {   // 队列是否达到最大值
 
             //
             // Decrement the number of entries in the queue object entry list,
@@ -417,7 +417,7 @@ Return Value:
             Entry->Flink = NULL;
             break;
 
-        } else {
+        } else {  // 达到最大值，阻塞
 
             //
             // Test to determine if a kernel APC is pending.
@@ -707,10 +707,10 @@ Return Value:
     // entry list.
     //
 
-    OldState = Queue->Header.SignalState;
+    OldState = Queue->Header.SignalState;  // 获取信号状态
     Thread = KeGetCurrentThread();
     WaitEntry = Queue->Header.WaitListHead.Blink;
-    if ((WaitEntry != &Queue->Header.WaitListHead) &&
+    if ((WaitEntry != &Queue->Header.WaitListHead) &&  // 等待队列非空
         (Queue->CurrentCount < Queue->MaximumCount) &&
         ((Thread->Queue != Queue) ||
         (Thread->WaitReason != WrQueue))) {

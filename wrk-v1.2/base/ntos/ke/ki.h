@@ -2457,7 +2457,7 @@ Return Value:
     Prcb = KeGetCurrentPrcb();
     Thread->State = DeferredReady;  // 延迟就绪状态
     Thread->DeferredProcessor = Prcb->Number;
-    PushEntryList(&Prcb->DeferredReadyListHead,
+    PushEntryList(&Prcb->DeferredReadyListHead, // 插入到处理器PRCB中的延迟就绪链表中
                   &Thread->SwapListEntry);
 
 #endif
@@ -3076,9 +3076,9 @@ Return Value:
     //
     // Set wait completion status, remove wait blocks from object wait
     // lists, and remove thread from wait list.
-    //
+    // 设置等待完成状态，从object等待队列中移除线程及其等待内存块
 
-    Thread->WaitStatus |= WaitStatus;
+    Thread->WaitStatus |= WaitStatus;  
     WaitBlock = Thread->WaitBlockList;
     do {
         RemoveEntryList(&WaitBlock->WaitListEntry);
@@ -3091,7 +3091,7 @@ Return Value:
 
     //
     // If thread timer is still active, then cancel thread timer.
-    //
+    // 移除定时器
 
     Timer = &Thread->Timer;
     if (Timer->Header.Inserted != FALSE) {
@@ -3101,11 +3101,10 @@ Return Value:
     //
     // If the thread is processing a queue entry, then increment the
     // count of currently active threads.
-    //
 
     Queue = Thread->Queue;
     if (Queue != NULL) {
-        Queue->CurrentCount += 1;
+        Queue->CurrentCount += 1;    // 活跃线程+1
     }
 
     return;
@@ -3531,6 +3530,9 @@ Routine Description:
     This function searches the dispatcher ready queues from the specified
     low priority to the highest priority in an attempt to find a thread
     that can execute on the specified processor.
+
+	当PKPRCB的NextThread值为空时，调用此函数
+	返回某优先级上的最优先的线程
 
 Arguments:
 

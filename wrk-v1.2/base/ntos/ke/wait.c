@@ -301,7 +301,7 @@ Return Value:
     //
 
     OriginalTime = Interval;
-    Timer = &Thread->Timer;
+    Timer = &Thread->Timer;  //通过定时器，使其延迟一段时间执行
     WaitBlock = &Thread->WaitBlock[TIMER_WAIT_BLOCK];
 
     //
@@ -404,7 +404,7 @@ Return Value:
             ASSERT(Thread->WaitIrql <= DISPATCH_LEVEL);
 
             KiSetContextSwapBusy(Thread);
-            KiInsertOrSignalTimer(Timer, Hand);
+            KiInsertOrSignalTimer(Timer, Hand);  // 把定时器对象插入到系统定时器表中
             WaitStatus = (NTSTATUS)KiSwapThread(Thread, Prcb);
 
             //

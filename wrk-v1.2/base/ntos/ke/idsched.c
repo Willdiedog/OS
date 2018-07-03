@@ -32,7 +32,7 @@ KiIdleSchedule (
 /*++
 
 Routine Description:
-
+	处理器空闲调度标志(KPRCB的IdleSchedule域)被置为TRUE，则调用此函数
     This function is called when the idle schedule flag is set in the current
     PRCB. This flag is set when the current thread is entering a wait state
     or must be rescheduled for any other reason (e.g., affinity change) and

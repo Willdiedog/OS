@@ -1575,6 +1575,7 @@ KiAttachProcess (
 Routine Description:
 
     This function attaches a thread to a target process' address space.
+	线程附加到目标进程
 
     N.B. The dispatcher database lock and the thread APC queue lock must be
          held when this routine is called.

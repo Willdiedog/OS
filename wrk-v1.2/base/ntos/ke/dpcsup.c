@@ -298,11 +298,11 @@ Return Value:
             //      priority.
             //
 
-            Thread->Priority = KiComputeNewPriority(Thread, 1);
+            Thread->Priority = KiComputeNewPriority(Thread, 1);  // 重新计算优先级
             if (Prcb->NextThread == NULL) {
-                if ((NewThread = KiSelectReadyThread(Thread->Priority, Prcb)) != NULL) {
-                    NewThread->State = Standby;
-                    Prcb->NextThread = NewThread;
+                if ((NewThread = KiSelectReadyThread(Thread->Priority, Prcb)) != NULL) {  // 找到大于新优先级的线程
+                    NewThread->State = Standby;  // 就绪状态
+                    Prcb->NextThread = NewThread; // 等待下个时间片被调用
                 }
 
             } else {

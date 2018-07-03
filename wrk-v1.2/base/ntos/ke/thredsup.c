@@ -172,7 +172,7 @@ Return Value:
 
 #if defined(NT_SMT)
 
-    KAFFINITY FavoredSMTSet;
+    KAFFINITY FavoredSMTSet;  // MultiThread
     KAFFINITY IdleSMTSet;
 
 #endif
@@ -188,7 +188,7 @@ Return Value:
 
     //
     // Check if a priority adjustment is requested.
-    //
+    // 调整优先级
 
     if (Thread->AdjustReason == AdjustNone) {
 
@@ -397,7 +397,7 @@ Return Value:
     //
     // Save the value of thread's preempted flag and set thread preempted
     // FALSE,
-    //
+    // 线程占用
 
     Preempted = Thread->Preempted;
     Thread->Preempted = FALSE;
@@ -425,6 +425,7 @@ Return Value:
     // (f) select the leftmost processor from this set.
     //
 
+	// 选择处理器
 #if defined(NT_UP)
 
     Thread->NextProcessor = 0;
@@ -451,10 +452,10 @@ Return Value:
 IdleAssignment:
     Affinity = Thread->Affinity;
     do {
-        Processor = Thread->IdealProcessor;
+        Processor = Thread->IdealProcessor; // 设置为理想处理器
         IdleSet = KiIdleSummary & Affinity;
         if (IdleSet != 0) {
-            if ((IdleSet & AFFINITY_MASK(Processor)) == 0) {
+            if ((IdleSet & AFFINITY_MASK(Processor)) == 0) { // 如果理想处理器被占用
 
                 //
                 // Ideal processor is not available.
@@ -544,7 +545,7 @@ IdleAssignment:
             // run on the processor.
             //
 
-            TargetPrcb = KiProcessorBlock[Processor];
+            TargetPrcb = KiProcessorBlock[Processor]; // 最终选择的处理器控制块
             KiAcquireTwoPrcbLocks(CurrentPrcb, TargetPrcb);
             IdleSummary = ReadForWriteAccess(&KiIdleSummary);
             if (((IdleSummary & TargetPrcb->SetMember) != 0) &&
@@ -617,11 +618,11 @@ IdleAssignment:
 
             ASSERT(Thread1->State == Standby);
 
-            if (ThreadPriority > Thread1->Priority) {
+            if (ThreadPriority > Thread1->Priority) {  // 线程优先级大于处理器备用线程优先级，则抢占备用线程
                 Thread1->Preempted = TRUE;
                 Thread->State = Standby;
                 TargetPrcb->NextThread = Thread;
-                Thread1->State = DeferredReady;
+                Thread1->State = DeferredReady; // 备用线程回到延迟就绪状态
                 Thread1->DeferredProcessor = CurrentPrcb->Number;
                 KiReleaseTwoPrcbLocks(CurrentPrcb, TargetPrcb);
                 KiDeferredReadyThread(Thread1);
@@ -664,11 +665,11 @@ IdleAssignment:
 
     Thread->State = Ready;
     Thread->WaitTime = KiQueryLowTickCount();
-    if (Preempted != FALSE) {
+    if (Preempted != FALSE) {  // 抢占 插入队列头
         InsertHeadList(&TargetPrcb->DispatcherReadyListHead[ThreadPriority],
                        &Thread->WaitListEntry);
 
-    } else {
+    } else {  // 不能抢占 插到队列尾
         InsertTailList(&TargetPrcb->DispatcherReadyListHead[ThreadPriority],
                        &Thread->WaitListEntry);
     }
@@ -693,7 +694,7 @@ KiFindReadyThread (
 /*++
 
 Routine Description:
-
+	当前处理器没有要运行的线程时调用，从其它处理器寻找适合在当前处理器运行的线程
     This function searches the dispatcher ready queues in an attempt to find
     a thread that can execute on the specified processor.
 
@@ -844,7 +845,7 @@ Return Value:
     do {
         Thread = CONTAINING_RECORD(NextEntry, KTHREAD, SwapListEntry);
         NextEntry = NextEntry->Next;
-        KiDeferredReadyThread(Thread);
+        KiDeferredReadyThread(Thread);  // CPU延迟处理，使线程有机会变成就绪或备用状态
     } while (NextEntry != NULL);
 
     ASSERT(CurrentPrcb->DeferredReadyListHead.Next == NULL);
@@ -937,9 +938,9 @@ Return Value:
         Thread->State = Ready; // 线程就绪
         Thread->ProcessReadyQueue = TRUE;
         InsertTailList(&Process->ReadyListHead, &Thread->WaitListEntry); // 加入到进程就绪链表中
-        if (Process->State == ProcessOutOfMemory) {
+        if (Process->State == ProcessOutOfMemory) {  // 进程是被换出的内存
 			// 通知交换线程KiSwappingThread执行换入操作，线程状态设置为就绪状态
-            Process->State = ProcessInTransition;
+            Process->State = ProcessInTransition;  // 切入到换入状态
             InterlockedPushEntrySingleList(&KiProcessInSwapListHead,
                                            &Process->SwapListEntry);
 
@@ -992,7 +993,6 @@ KiSelectNextThread (
 /*++
 
 Routine Description:
-
     This function selects the next thread to run on the specified processor.
 
     N.B. This function is called with the specified PRCB lock held and also
@@ -1420,7 +1420,7 @@ Return Value:
 
     WaitEntry = Event->Header.WaitListHead.Flink;
     if (WaitEntry != &Event->Header.WaitListHead) {
-        KiUnwaitThread(Thread, 0, BALANCE_INCREMENT);
+        KiUnwaitThread(Thread, 0, BALANCE_INCREMENT);  // BALANCE_INCREMENT=10 线程优先级增量为10
 
     } else {
         Event->Header.SignalState = 1;
@@ -1699,7 +1699,9 @@ KiSwapThread (
 /*++
 
 Routine Description:
-
+	此线程不是当前处理器的空闲线程，也不是当前线程，并且新线程正在被切换过程中(其SwapBusy为TRUE)，
+	则将此线程设置为当前处理器的备用线程，而空闲线程置为当前线程，从而让
+	空闲线程负责切换到新线程，已避免死锁
     This function selects the next thread to run on the current processor
     and swaps thread context to the selected thread. When the execution
     of the current thread is resumed, the IRQL is lowered to its previous

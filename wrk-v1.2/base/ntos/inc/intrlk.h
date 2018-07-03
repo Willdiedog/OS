@@ -84,6 +84,7 @@ InterlockedPushEntrySingleList (
 Routine Description:
 
     This function pushes an entry onto the front of a singly linked list.
+	节点插入单链表头
 
 Arguments:
 

@@ -581,7 +581,7 @@ KiInSwapProcesses (
 
 Routine Description:
 
-    This function in swaps processes.
+    This function in swaps processes. ½ø³Ì»»Èë
 
 Arguments:
 

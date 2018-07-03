@@ -916,7 +916,7 @@ cPublicFpo 0,0
         mov     eax, [esp + 4]          ; set comperand value
 .486
 ifndef NT_UP
-   lock cmpxchg [ecx], edx              ; compare and exchange
+   lock cmpxchg [ecx], edx              ; compare and exchange  比较并交换
 else
         cmpxchg [ecx], edx              ; compare and exchange
 endif

@@ -122,7 +122,7 @@ KiUnwaitThread (
 /*++
 
 Routine Description:
-
+    解除等待 计算线程优先级 线程等待执行或加入等待队列
     This function unwaits a thread, sets the thread's wait completion status,
     calculates the thread's new priority, and either readies the thread for
     execution or adds the thread to a list of threads to be readied later.
@@ -147,13 +147,13 @@ Return Value:
     //
     // Unlink thread from the appropriate wait queues and set the wait
     // completion status.
-    //
+    // 从等待队列从移除 并设置为等待完成状态
 
     KiUnlinkThread(Thread, WaitStatus);
 
     //
     // Set unwait priority adjustment parameters.
-    //
+    // 
 
     ASSERT(Increment >= 0);
 

@@ -1082,8 +1082,8 @@ typedef struct _KPRCB {
     USHORT MajorVersion;
 
     struct _KTHREAD *CurrentThread; // 当前线程指针
-    struct _KTHREAD *NextThread;
-    struct _KTHREAD *IdleThread;
+    struct _KTHREAD *NextThread;  // 下个要运行的线程指针(备用线程)
+    struct _KTHREAD *IdleThread;  // 空闲线程，该处理器初始线程完成了初始化后蜕变而来
 
     CCHAR  Number;
     CCHAR  Reserved;
@@ -1273,9 +1273,9 @@ typedef struct _KPRCB {
 //
 
     LIST_ENTRY WaitListHead;
-    ULONG ReadySummary;
+    ULONG ReadySummary; // DispatcherReadyListHead中那些优先级的链表非空
     ULONG QueueIndex;
-    LIST_ENTRY DispatcherReadyListHead[MAXIMUM_PRIORITY];
+    LIST_ENTRY DispatcherReadyListHead[MAXIMUM_PRIORITY];  // 特定优先级的就绪链表数组 ENTRY为延迟就绪状态线程
     SINGLE_LIST_ENTRY DeferredReadyListHead;
     ULONG PrcbPad72[11];
 

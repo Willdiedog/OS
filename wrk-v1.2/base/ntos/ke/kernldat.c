@@ -24,7 +24,7 @@ Abstract:
 //      the individual timer lists.
 //
 
-DECLSPEC_CACHEALIGN KTIMER_TABLE_ENTRY KiTimerTableListHead[TIMER_TABLE_SIZE];
+DECLSPEC_CACHEALIGN KTIMER_TABLE_ENTRY KiTimerTableListHead[TIMER_TABLE_SIZE]; // 系统定时器表
 
 //
 // KiQueuedLockTableSize - This is the size of the PRCB based numbered queued
@@ -385,7 +385,7 @@ UCHAR KeNumberNodes = 1;
 //
 // KeNodeBlock - This is an array of pointers to KNODE structures. A KNODE
 // structure describes the resources of a NODE in a ccNUMA system.
-//
+// ccNUMA: cache coherent Non-Uniform Memory Architecture 高速缓存相关的非统一内存访问架构
 
 KNODE KiNode0;
 
@@ -405,7 +405,7 @@ PKNODE KeNodeBlock[1] = {&KiNode0};
 // KiSwapEvent - This is the event that is used to wake up the balance set
 //      thread to inswap processes, outswap processes, and to inswap kernel
 //      stacks.
-//
+// 用于唤醒线程的事件
 
 KEVENT KiSwapEvent;
 
@@ -413,7 +413,7 @@ KEVENT KiSwapEvent;
 // KiSwappingThread - This is a pointer to the swap thread object.
 //
 
-PKTHREAD KiSwappingThread;
+PKTHREAD KiSwappingThread;  // 交换线程
 
 //
 // KiProcessListHead - This is the list of processes that have active threads.
