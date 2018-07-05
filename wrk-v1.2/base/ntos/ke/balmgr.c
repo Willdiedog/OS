@@ -342,6 +342,8 @@ Routine Description:
         Inswap processes
         Inswap kernel stacks
 
+		换入/换出内核栈或进程
+
 Arguments:
 
     Context - Supplies a pointer to the routine context - not used.
@@ -399,7 +401,7 @@ Return Value:
                                        FALSE,
                                        TRUE) == TRUE) {
 
-            KiOutSwapKernelStacks();
+            KiOutSwapKernelStacks(); // 换出内核栈
         }
 
         //
@@ -760,7 +762,7 @@ Return Value:
         //
 
         KeWaitForContextSwap(Thread);
-        MmOutPageKernelStack(Thread);
+        MmOutPageKernelStack(Thread); // 换出内存
     }
 
     return;

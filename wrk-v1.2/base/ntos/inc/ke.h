@@ -23,8 +23,8 @@ Abstract:
 // Define the default quantum decrement values.
 //
 
-#define CLOCK_QUANTUM_DECREMENT 3
-#define WAIT_QUANTUM_DECREMENT 1
+#define CLOCK_QUANTUM_DECREMENT 3  // 处理器正在处理线程的 每个时钟中断的时限的减少量
+#define WAIT_QUANTUM_DECREMENT 1   // 线程从等待状态唤醒时的 时限的减少量
 #define LOCK_OWNERSHIP_QUANTUM (WAIT_QUANTUM_DECREMENT * 4)
 
 //
@@ -1121,7 +1121,7 @@ typedef struct _KTHREAD {
     BOOLEAN WaitNext; // 是否马上调用内核等待函数
     UCHAR WaitReason;  // 等待原因
     SCHAR Priority;  // 线程de动态优先级
-    UCHAR EnableStackSwap;  // 内核栈是否允许换出到外存
+    UCHAR EnableStackSwap;  // 内核栈是否允许换出到外存  内存紧张时，可能会换出
     volatile UCHAR SwapBusy; // 当前是否正在上下文切换
     BOOLEAN Alerted[MaximumMode];  // 在每一种警告模式下是否可以被唤醒
     union {
@@ -1310,12 +1310,12 @@ typedef struct _KTHREAD {
         KAPC SuspendApc;  // 线程挂起操作  Suspend
         struct {
             UCHAR SuspendApcFill0[KAPC_OFFSET_TO_SPARE_BYTE0];
-            SCHAR Quantum;  // CPU处理时间片  线程的当前时限还剩多少时间单位
+            SCHAR Quantum;  // 线程的当前时限还剩多少时间单位
         };
 
         struct {
             UCHAR SuspendApcFill1[KAPC_OFFSET_TO_SPARE_BYTE1];
-            UCHAR QuantumReset; // 线程时限重置值   一个完整时限的时间单位
+            UCHAR QuantumReset; // 线程时限重置值   一个完整时限的时间片   客户端系统值为6  服务器系统值为36
         };
 
         struct {

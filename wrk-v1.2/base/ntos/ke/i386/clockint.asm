@@ -114,7 +114,7 @@ _TEXT$00   SEGMENT DWORD PUBLIC 'CODE'
 ;    None.
 ;
 ;--
-cPublicProc _KeUpdateSystemTime     ,0
+cPublicProc _KeUpdateSystemTime     ,0  ; 时钟中断的处理函数
 
 .FPO (2, 0, 0, 0, 0, 1) ; treat params as locals since functions is JMPed too
 
@@ -257,7 +257,7 @@ kust30: cmp     _KiTickOffset,0         ; check if full tick
 
 ; TOS const PreviousIrql
         push    [esp]
-        call    _KeUpdateRunTime@4
+        call    _KeUpdateRunTime@4  // 调用KeUpdateRunTime
 
 ;
 ; Do interrupt exit processing

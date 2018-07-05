@@ -964,11 +964,11 @@ PsChangeQuantumTable (
 
     //
     // determine if we are using fixed or variable quantums
-    //
+    // 确定时限数组
 
     switch (PrioritySeparation & PROCESS_QUANTUM_VARIABLE_MASK) {
     case PROCESS_QUANTUM_VARIABLE_VALUE:
-        QuantumTableBase = PspVariableQuantums;
+        QuantumTableBase = PspVariableQuantums;  // 
         break;
 
     case PROCESS_QUANTUM_FIXED_VALUE:
