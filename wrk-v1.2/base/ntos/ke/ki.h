@@ -1365,7 +1365,7 @@ Routine Description:
 
     This function interlocked merges the specified mask into the current idle
     summary.
-
+	设置空闲处理器标志位
 Arguments:
 
     Mask - Supplies the affinity mask to merge.
@@ -3328,7 +3328,7 @@ Return Value:
             break;
         }
 
-        KiUnwaitThread(Thread, STATUS_KERNEL_APC, Increment);
+        KiUnwaitThread(Thread, STATUS_KERNEL_APC, Increment);// 满足等待条件，调用KiReadyThread，加入延迟等待队列
         WaitEntry = ListHead->Flink;
     } while (WaitEntry != ListHead);
 
@@ -3395,7 +3395,7 @@ Return Value:
         // If the wait type is wait any, then unwait the thread with the
         // wait key status. Otherwise, unwait the thread with a kernel APC
         // status.
-        //
+        // 满足等待条件，调用KiReadyThread，加入延迟等待队列
 
         if (WaitBlock->WaitType == WaitAny) {
             KiUnwaitThread(Thread, (NTSTATUS)WaitBlock->WaitKey, Increment);

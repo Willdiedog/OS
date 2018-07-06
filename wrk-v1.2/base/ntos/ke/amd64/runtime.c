@@ -194,7 +194,7 @@ Return Value:
         //
 
         if ((Thread != Prcb->IdleThread) &&
-            ((Thread->Quantum -= CLOCK_QUANTUM_DECREMENT) <= 0)) {  // 降低线程时限
+            ((Thread->Quantum -= CLOCK_QUANTUM_DECREMENT) <= 0)) {  // 降低线程时限,当线程时限<=0时，触发线程调度
 
             Prcb->QuantumEnd = TRUE;
             KiRequestSoftwareInterrupt(DISPATCH_LEVEL);

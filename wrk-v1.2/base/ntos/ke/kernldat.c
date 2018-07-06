@@ -373,7 +373,7 @@ volatile ULONG KiSuspendState;
 //      that need to effect the execution of another processor.
 //
 
-DECLSPEC_CACHEALIGN PKPRCB KiProcessorBlock[MAXIMUM_PROCESSORS];
+DECLSPEC_CACHEALIGN PKPRCB KiProcessorBlock[MAXIMUM_PROCESSORS];  // 处理器数组
 
 //
 // KeNumberNodes - This is the number of ccNUMA nodes in the system. Logically

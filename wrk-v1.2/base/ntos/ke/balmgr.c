@@ -41,7 +41,7 @@ Abstract:
 
 //
 // Define balance set wait object types.
-//
+// 平衡集管理器 用于内存管理
 
 typedef enum _BALANCE_OBJECT {
     TimerExpiration,
@@ -428,7 +428,7 @@ Return Value:
 
         SwapEntry = InterlockedFlushSingleList(&KiStackInSwapListHead);
         if (SwapEntry != NULL) {
-            KiInSwapKernelStacks(SwapEntry);
+            KiInSwapKernelStacks(SwapEntry); // 换入内核
         }
 
     } while (TRUE);

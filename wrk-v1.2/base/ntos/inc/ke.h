@@ -1265,7 +1265,7 @@ typedef struct _KTHREAD {
 
 #endif
 
-    BOOLEAN KernelStackResident; // 线程的内核栈是否驻留在内存中
+    BOOLEAN KernelStackResident; // 线程的内核栈是否驻留在内存中 or 被换出内存
     SCHAR BasePriority;  // 线程的静态优先级
     SCHAR PriorityDecrement;  // 优先级动态调整过程中的递减值
     CHAR Saturation;  // 线程基本优先级相对于进程的基本优先级的调整量，是否超过整个区间的一半  0,1，-1
@@ -2676,7 +2676,7 @@ KeSetTimerEx (
 
 // end_ntddk end_nthal end_ntifs end_wdm end_ntosp
 
-extern volatile KAFFINITY KiIdleSummary;
+extern volatile KAFFINITY KiIdleSummary;  // 处理器空闲bitarray  处理器空闲指该处理器正在执行空闲循环 
 
 FORCEINLINE
 BOOLEAN

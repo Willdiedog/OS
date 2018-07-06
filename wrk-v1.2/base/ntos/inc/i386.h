@@ -1272,7 +1272,7 @@ typedef struct _KPRCB {
 //      zero is never used.
 //
 
-    LIST_ENTRY WaitListHead;
+    LIST_ENTRY WaitListHead;  // 等待线程链表   
     ULONG ReadySummary; // DispatcherReadyListHead中那些优先级的链表非空
     ULONG QueueIndex;
     LIST_ENTRY DispatcherReadyListHead[MAXIMUM_PRIORITY];  // 特定优先级的就绪链表数组 ENTRY为延迟就绪状态线程

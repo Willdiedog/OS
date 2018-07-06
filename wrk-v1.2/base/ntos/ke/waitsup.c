@@ -232,7 +232,7 @@ Return Value:
             KiWaitSatisfyAny((PKMUTANT)Event, Thread);
         }
 
-        KiUnwaitThread(Thread, WaitStatus, Increment);
+        KiUnwaitThread(Thread, WaitStatus, Increment);  // 满足等待条件，调用KiReadyThread，加入延迟等待队列
         WaitEntry = ListHead->Flink;
     }
 

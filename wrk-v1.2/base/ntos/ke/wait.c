@@ -878,7 +878,7 @@ Return Value:
 
             CurrentPrcb = KeGetCurrentPrcb();
             Thread->State = Waiting;
-            if (StackSwappable != FALSE) {
+            if (StackSwappable != FALSE) {  // 是否允许将内核栈换出
                 InsertTailList(&CurrentPrcb->WaitListHead, &Thread->WaitListEntry);
             }
 
@@ -1207,7 +1207,7 @@ Return Value:
             //
             // Set the thread wait parameters, set the thread dispatcher state
             // to Waiting, and insert the thread in the wait list.
-            //
+            // 切换到等待状态，加入到等待队列尾   满足等待条件后，进入延迟就绪状态
 
             Thread->State = Waiting;
             CurrentPrcb = KeGetCurrentPrcb();

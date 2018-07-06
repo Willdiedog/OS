@@ -67,6 +67,9 @@ Routine Description:
     This function conditionally sets the signal state of a gate object and
     attempts to unwait the first waiter.
 
+	释放一个门对象，唤醒门对象的等待链表中的第一个等待线程
+	从而是线程，从门等待状态转变为延迟就绪状态
+
 Arguments:
 
     Gate - Supplies a pointer to a dispatcher object of type gate.
