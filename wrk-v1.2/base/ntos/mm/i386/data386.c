@@ -119,7 +119,7 @@ PVOID MmNonPagedPoolStart;
 
 PVOID MmNonPagedPoolEnd = (PVOID) MM_NONPAGED_POOL_END;
 
-PVOID MmPagedPoolStart = (PVOID) MM_DEFAULT_PAGED_POOL_START;
+PVOID MmPagedPoolStart = (PVOID) MM_DEFAULT_PAGED_POOL_START;  // »»Ò³ÄÚ´æ³Ø
 
 PVOID MmPagedPoolEnd;
 

@@ -344,10 +344,10 @@ MmInitSystem (
 Routine Description:
 
     This function is called during Phase 0, phase 1 and at the end
-    of phase 1 ("phase 2") initialization.
+    of phase 1 ("phase 2") initialization.  被Phase0，Phase1，Phase2调用三次
 
     Phase 0 initializes the memory management paging functions,
-    nonpaged and paged pool, the PFN database, etc.
+    nonpaged and paged pool, the PFN database, etc. Phase0 初始化内存管理分页功能 不分页和分页内存池  PFN数据库
 
     Phase 1 initializes the section objects, the physical memory
     object, and starts the memory management system threads.
@@ -428,7 +428,7 @@ Environment:
 
     //
     // Make sure structure alignment is okay.
-    //
+    // Phase0
 
     if (Phase == 0) {
         MmThrottleTop = 450;
@@ -463,9 +463,9 @@ Environment:
 
 #else
 
-        MmHighestUserAddress = (PVOID)(KSEG0_BASE - 0x10000 - 1);
+        MmHighestUserAddress = (PVOID)(KSEG0_BASE - 0x10000 - 1); // 0x7FFE FFFF 用户内存空间最高位置
         MmUserProbeAddress = KSEG0_BASE - 0x10000;
-        MmSystemRangeStart = (PVOID)KSEG0_BASE;
+        MmSystemRangeStart = (PVOID)KSEG0_BASE;  // 0x80000000 系统内存空间起始位置
 
 #endif
 
@@ -494,17 +494,17 @@ Environment:
 
         //
         // Initialize system and Hydra mapped view sizes.
-        //
+        // 
 
-        DefaultSystemViewSize = MM_SYSTEM_VIEW_SIZE;
-        MmSessionSize = MI_SESSION_SPACE_DEFAULT_TOTAL_SIZE;
+        DefaultSystemViewSize = MM_SYSTEM_VIEW_SIZE;  // 16M系统视图
+        MmSessionSize = MI_SESSION_SPACE_DEFAULT_TOTAL_SIZE;  // 48M会话空间  0xbd000000-0xbfffffff
         SessionEnd = (ULONG_PTR) MM_SESSION_SPACE_DEFAULT_END;
 
 #define MM_MB_MAPPED_BY_PDE (MM_VA_MAPPED_BY_PDE / (1024*1024))
 
         //
         // A PDE of virtual space is the minimum system view size allowed.
-        //
+        // 页目录
 
         if (MmSystemViewSize < (MM_VA_MAPPED_BY_PDE / (1024*1024))) {
             MmSystemViewSize = DefaultSystemViewSize;
@@ -1386,11 +1386,11 @@ Environment:
         // Initialize the machine dependent portion of the hardware.
         //
 
-        MiInitMachineDependent (LoaderBlock);
+        MiInitMachineDependent (LoaderBlock); // 建立页目录、页表
 
         MmPhysicalMemoryBlock = MmInitializeMemoryLimits (LoaderBlock,
                                                           IncludeType,
-                                                          NULL);
+                                                          NULL);  // 获取物理内存基本信息
 
         if (MmPhysicalMemoryBlock == NULL) {
             KeBugCheckEx (INSTALL_MORE_MEMORY,
@@ -1470,6 +1470,7 @@ Environment:
                           0x101);
         }
 
+		// 创建内存标记位图
         RtlInitializeBitMap (&MiPfnBitMap,
                              Bitmap,
                              (ULONG)(MmHighestPossiblePhysicalPage + 1));
@@ -1521,7 +1522,7 @@ Environment:
         //
         // Relocate all the drivers so they can be paged (and protected) on
         // a per-page basis.
-        //
+        // ntldr加载的引导-启动程序重定位到系统PTE区域
 
         MiReloadBootLoadedDrivers (LoaderBlock);
 
@@ -1551,7 +1552,7 @@ Environment:
         // >= 64 is large for server
         //
 
-        if (MmNumberOfPhysicalPages <= MM_SMALL_SYSTEM) {
+        if (MmNumberOfPhysicalPages <= MM_SMALL_SYSTEM) {  // 小系统  < 19MB
             MmSystemSize = MmSmallSystem;
             MmMaximumDeadKernelStacks = 0;
             MmModifiedPageMaximum = 100;
@@ -1560,7 +1561,7 @@ Environment:
             MmReadClusterSize = 2;
             MmInPageSupportMinimum = 2;
         }
-        else if (MmNumberOfPhysicalPages <= MM_MEDIUM_SYSTEM) {
+        else if (MmNumberOfPhysicalPages <= MM_MEDIUM_SYSTEM) {  // 中等规模系统 19-31MB
             MmSystemSize = MmSmallSystem;
             MmMaximumDeadKernelStacks = 2;
             MmModifiedPageMaximum = 150;
@@ -1570,7 +1571,7 @@ Environment:
             MmReadClusterSize = 4;
             MmInPageSupportMinimum = 3;
         }
-        else {
+        else {  // 大系统
             MmSystemSize = MmMediumSystem;
             MmMaximumDeadKernelStacks = 5;
             MmModifiedPageMaximum = 300;
@@ -1712,17 +1713,15 @@ Environment:
         //
         // Set the ResidentAvailablePages to the number of available
         // pages minus the fluid value.
-        //
 
-        MmResidentAvailablePages = MmAvailablePages - MM_FLUID_PHYSICAL_PAGES;
+        MmResidentAvailablePages = MmAvailablePages - MM_FLUID_PHYSICAL_PAGES; // 可用物理内存页面数量 - 保留页面
 
         //
         // Subtract off the size of future nonpaged pool expansion
         // so that nonpaged pool will always be able to expand regardless of
         // prior system load activity.
-        //
 
-        MmResidentAvailablePages -= MiExpansionPoolPagesInitialCharge;
+        MmResidentAvailablePages -= MiExpansionPoolPagesInitialCharge; // 减去 非换页扩展页面数
 
         //
         // Subtract off the size of the system cache working set.

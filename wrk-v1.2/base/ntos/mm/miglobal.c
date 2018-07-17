@@ -284,7 +284,7 @@ SIZE_T MmDefaultMaximumNonPagedPool = 1024 * 1024;  // 1mb
 
 ULONG MmMaxAdditionNonPagedPoolPerMb = 400 * 1024;  //400k
 
-SIZE_T MmSizeOfPagedPoolInBytes = 32 * 1024 * 1024; // 32 MB.
+SIZE_T MmSizeOfPagedPoolInBytes = 32 * 1024 * 1024; // 32 MB.  换页内存池的大小
 PFN_NUMBER MmSizeOfPagedPoolInPages = (32 * 1024 * 1024) / PAGE_SIZE; // 32 MB.
 
 PFN_NUMBER MmNumberOfSystemPtes;
@@ -319,7 +319,8 @@ MMSUPPORT MmSystemCacheWs;
 
 PMMWSLE MmSystemCacheWsle;
 
-PVOID MmSystemCacheStart = (PVOID)MM_SYSTEM_CACHE_START;
+// 系统缓存
+PVOID MmSystemCacheStart = (PVOID)MM_SYSTEM_CACHE_START;  // System Cache Range: 0xC1000000 - 0xE1000000 MM_SYSTEM_CACHE_END
 
 PVOID MmSystemCacheEnd;
 

@@ -237,7 +237,7 @@ extern BOOLEAN MiWriteCombiningPtes;
 
 //
 // Define absolute minimum and maximum count for system PTEs.
-//
+// PTE 7000-50000
 
 #define MM_MINIMUM_SYSTEM_PTES 7000
 
@@ -1907,7 +1907,7 @@ extern ULONG MiMaximumWorkingSet;
 // Return Value:
 //
 //    The address of the PTE.
-//
+//    虚拟地址所在的页表项
 //--
 
 #define MiGetPteAddress(va) ((PMMPTE)(((((ULONG)(va)) >> 12) << 2) + PTE_BASE))

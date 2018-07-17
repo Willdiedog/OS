@@ -1840,7 +1840,7 @@ typedef struct _KFLOATING_SAVE {
 
 //
 // Define the page size for the Intel 386 as 4096 (0x1000).
-//
+// 页大小4096
 
 #define PAGE_SIZE 0x1000
 
@@ -1961,9 +1961,9 @@ extern ULONG _LOCAL_COPY_USER_PROBE_ADDRESS_;
 #define PDE_TOP_X86PAE  0xC0603FFF
 
 
-#if !defined (_X86PAE_)
-#define PDE_BASE PDE_BASE_X86
-#define PTE_TOP  PTE_TOP_X86
+#if !defined (_X86PAE_)  // PAE: 物理地址扩展
+#define PDE_BASE PDE_BASE_X86 // 页目录项起始位置
+#define PTE_TOP  PTE_TOP_X86  // 
 #define PDE_TOP  PDE_TOP_X86
 #else
 #define PDE_BASE PDE_BASE_X86PAE
@@ -1978,7 +1978,7 @@ extern ULONG _LOCAL_COPY_USER_PROBE_ADDRESS_;
 // Define virtual base and alternate virtual base of kernel.
 //
 
-#define KSEG0_BASE 0x80000000
+#define KSEG0_BASE 0x80000000  // 系统空间起始位置
 #define ALTERNATE_BASE (0xe1000000 - 16 * 1024 * 1024)
 
 //

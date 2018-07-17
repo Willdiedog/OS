@@ -7567,7 +7567,7 @@ extern ULONG MmMinAdditionNonPagedPoolPerMb;
 
 extern ULONG MmMaxAdditionNonPagedPoolPerMb;
 
-extern SIZE_T MmSizeOfPagedPoolInBytes;
+extern SIZE_T MmSizeOfPagedPoolInBytes;  // 换页内存池大小  默认32MB
 extern PFN_NUMBER MmSizeOfPagedPoolInPages;
 
 extern SIZE_T MmMaximumNonPagedPoolInBytes;
@@ -7737,7 +7737,7 @@ extern PRTL_BITMAP VerifierLargePagedPoolMap;
 
 extern MMPTE MmFirstFreeSystemPte[MaximumPtePoolTypes];
 
-extern ULONG_PTR MiSystemViewStart;
+extern ULONG_PTR MiSystemViewStart;  // 系统视图
 
 //
 // System cache sizes.
@@ -8182,7 +8182,7 @@ extern ULONG MiOverCommitCallCount;
 
 extern PPAGE_FAULT_NOTIFY_ROUTINE MmPageFaultNotifyRoutine;
 
-extern SIZE_T MmSystemViewSize;
+extern SIZE_T MmSystemViewSize;  // 系统视图大小
 
 VOID
 FASTCALL
@@ -8322,9 +8322,11 @@ extern PMMPTE MiSessionLastPte;
 
 extern ULONG_PTR MiSessionSpaceWs;
 
+// 会话视图
 extern ULONG_PTR MiSessionViewStart;
 extern SIZE_T MmSessionViewSize;
 
+// 会话映像文件  默认8MB
 extern ULONG_PTR MiSessionImageStart;
 extern ULONG_PTR MiSessionImageEnd;
 extern SIZE_T MmSessionImageSize;
@@ -8332,6 +8334,7 @@ extern SIZE_T MmSessionImageSize;
 extern PMMPTE MiSessionImagePteStart;
 extern PMMPTE MiSessionImagePteEnd;
 
+// 会话内存池 默认16MB
 extern ULONG_PTR MiSessionPoolStart;
 extern ULONG_PTR MiSessionPoolEnd;
 extern SIZE_T MmSessionPoolSize;
