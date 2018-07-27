@@ -766,7 +766,7 @@ MiInitMachineDependent (
 
 /*++
 
-Routine Description:   建立页目，建立页表来映射内核各个区域
+Routine Description:   建立页目录，建立页表来映射内核各个区域
 
     This routine performs the necessary operations to enable virtual
     memory.  This includes building the page directory page, building

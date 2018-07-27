@@ -1331,7 +1331,7 @@ Environment:
         // succeed.
         //
 
-        MmTotalCommitLimit = _2gb / PAGE_SIZE;
+        MmTotalCommitLimit = _2gb / PAGE_SIZE;  // 物理内存最大值
         MmTotalCommitLimitMaximum = MmTotalCommitLimit;
 
         //
@@ -1727,7 +1727,7 @@ Environment:
         // Subtract off the size of the system cache working set.
         //
 
-        MmResidentAvailablePages -= MmSystemCacheWsMinimum;
+        MmResidentAvailablePages -= MmSystemCacheWsMinimum; // 系统缓存的最小物理页面数
         MmResidentAvailableAtInit = MmResidentAvailablePages;
 
         if (MmResidentAvailablePages < 0) {
@@ -1755,7 +1755,7 @@ Environment:
 
         //
         // Build the system cache structures.
-        //
+        // 创建系统缓存结构
 
         StartPde = MiGetPdeAddress (MmSystemCacheWorkingSetList);
         PointerPte = MiGetPteAddress (MmSystemCacheWorkingSetList);
@@ -2088,7 +2088,7 @@ Environment:
         // Build paged pool.
         //
 
-        MiBuildPagedPool ();
+        MiBuildPagedPool ();  // 建立换页内存池
 
         //
         // Initialize the loaded module list.  This cannot be done until
