@@ -94,7 +94,7 @@ C_ASSERT(PAGE_SIZE == 0x1000);
 
 #endif
 
-#define POOL_LIST_HEADS (POOL_PAGE_SIZE / (1 << POOL_BLOCK_SHIFT))
+#define POOL_LIST_HEADS (POOL_PAGE_SIZE / (1 << POOL_BLOCK_SHIFT)) // 4096-16=4080  4080/8=512
 
 #define PAGE_ALIGNED(p) (!(((ULONG_PTR)p) & (POOL_PAGE_SIZE - 1)))
 
@@ -121,7 +121,7 @@ typedef struct _POOL_DESCRIPTOR {
     LONG PendingFreeDepth;
     SIZE_T TotalBytes;
     SIZE_T Spare0;
-    LIST_ENTRY ListHeads[POOL_LIST_HEADS];
+    LIST_ENTRY ListHeads[POOL_LIST_HEADS];  // 快查表  512个   8,16,24...4080字节
 } POOL_DESCRIPTOR, *PPOOL_DESCRIPTOR;
 
 //
@@ -174,7 +174,7 @@ typedef struct _POOL_HEADER {
 #else
             USHORT PreviousSize : 9;
             USHORT PoolIndex : 7;
-            USHORT BlockSize : 9;
+            USHORT BlockSize : 9;  // BlockSize*8
             USHORT PoolType : 7;
 #endif
         };

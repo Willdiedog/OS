@@ -773,7 +773,7 @@ Routine Description:   建立页目录，建立页表来映射内核各个区域
     page table pages to map the code section, the data section, the
     stack section and the trap handler.
 
-    It also initializes the PFN database and populates the free list.
+    It also initializes the PFN database and populates the free list. 初始化PFN database
 
 Arguments:
 
@@ -1025,7 +1025,7 @@ Environment:
     //
     // Get the lower bound of the free physical memory and the
     // number of physical pages by walking the memory descriptor lists.
-    //
+    // 获得空闲物理内存的最低地址
 
     MxFreeDescriptor = NULL;
     TotalFreePages = 0;
@@ -2075,7 +2075,7 @@ Environment:
         //
         // Put the PFN database in low virtual memory just
         // above the loaded images.
-        //
+        // 放PFN database在高于已加载image的低虚拟地址上
 
         MmPfnDatabase = (PMMPFN)(MM_KSEG0_BASE | MmBootImageSize);
 
@@ -2315,7 +2315,7 @@ Environment:
     // Set up page table pages to map system PTEs and the expansion nonpaged
     // pool.  If the system was booted /3GB, then the initial nonpaged pool
     // is mapped here as well.
-    //
+    // 分配系统PTE和扩展的非换页内存池地址范围的页表
 
     StartPde = MiGetPdeAddress (MmNonPagedSystemStart);
     EndPde = MiGetPdeAddress ((PVOID)((PCHAR)MmNonPagedPoolEnd - 1));
@@ -2329,9 +2329,9 @@ Environment:
         // slush descriptor if one exists.
         //
 
-        TempPde.u.Hard.PageFrameNumber = MxGetNextPage (1, TRUE);
+        TempPde.u.Hard.PageFrameNumber = MxGetNextPage (1, TRUE);  // MxGetNextPage 分配一个物理页，返回其页帧号
         *StartPde = TempPde;
-        PointerPte = MiGetVirtualAddressMappedByPte (StartPde);
+        PointerPte = MiGetVirtualAddressMappedByPte (StartPde);  // 根据StartPde，计算对应页表的虚拟地址
         RtlZeroMemory (PointerPte, PAGE_SIZE);
         StartPde += 1;
     }
@@ -2574,7 +2574,7 @@ Environment:
 
     //
     // Non-paged pages now exist, build the pool structures.
-    //
+    // 初始化非换页内存池的管理息信
 
     MiInitializeNonPagedPool ();
 

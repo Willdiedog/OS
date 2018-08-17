@@ -1376,7 +1376,7 @@ Return Value:
 
     //
     //  First look for a run of clear bits that equals the size requested
-    //
+    //  搜索指定数量的连续零位   连续的空闲页面
 
     StartingIndex = RtlFindClearBits( BitMapHeader,
                                       NumberToFind,

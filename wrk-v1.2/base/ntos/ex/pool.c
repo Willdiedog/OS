@@ -333,8 +333,8 @@ PPOOL_DESCRIPTOR ExpNonPagedPoolDescriptor[EXP_MAXIMUM_POOL_NODES];
 // it can be found easily by the kernel debugger.
 //
 
-PPOOL_DESCRIPTOR PoolVector[NUMBER_OF_POOLS];
-PPOOL_DESCRIPTOR ExpPagedPoolDescriptor[EXP_MAXIMUM_POOL_NODES + 1];
+PPOOL_DESCRIPTOR PoolVector[NUMBER_OF_POOLS];  // 0-指向非换页内存池，为NonPagedPoolDescriptor地址  1-指向换页内存池，指向第一个换页内存池
+PPOOL_DESCRIPTOR ExpPagedPoolDescriptor[EXP_MAXIMUM_POOL_NODES + 1];  // 用于多个换页内存池的情形  每个元素分别指向一个换页内存池
 PKGUARDED_MUTEX ExpPagedPoolMutex;
 
 volatile ULONG ExpPoolIndex = 1;
@@ -939,7 +939,7 @@ Return Value:
 
     ASSERT((PoolType & MUST_SUCCEED_POOL_TYPE_MASK) == 0);
 
-    if (PoolType == NonPagedPool) {
+    if (PoolType == NonPagedPool) {  // 非换页内存初始化
 
         //
         // Initialize nonpaged pools.
@@ -1159,7 +1159,7 @@ Return Value:
                                     Threshold,
                                     NULL);
     }
-    else {
+    else {  // 初始化换页内存池
 
         //
         // Allocate memory for the paged pool descriptors and fast mutexes.
@@ -1902,7 +1902,7 @@ Return Value:
     //
     // Check to determine if the requested block can be allocated from one
     // of the pool lists or must be directly allocated from virtual memory.
-    //
+    // 大于POOL_BUDDY_MAX，直接调用系统内存池的内存分配函数   小于则用内存池快查表
 
     if (NumberOfBytes > POOL_BUDDY_MAX) {
 

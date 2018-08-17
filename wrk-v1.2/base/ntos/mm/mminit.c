@@ -2287,7 +2287,7 @@ Environment:
         }
 #endif
 
-        MiSessionWideInitializeAddresses ();
+        MiSessionWideInitializeAddresses (); // 初始化会话空间
         MiInitializeSessionWsSupport ();
         MiInitializeSessionIds ();
 
@@ -2303,7 +2303,7 @@ Environment:
                                               0L,
                                               NULL,
                                               MiModifiedPageWriter,
-                                              NULL))) {
+                                              NULL))) {  // 修改页面写出器，系统线程
             return FALSE;
         }
         ZwClose (ThreadHandle);
@@ -2317,7 +2317,7 @@ Environment:
             return FALSE;
         }
 
-        //
+        // 启动平滑集管理器
         // Start the balance set manager.
         //
         // The balance set manager performs stack swapping and working
@@ -2331,7 +2331,7 @@ Environment:
                                               &ObjectAttributes,
                                               0L,
                                               NULL,
-                                              KeBalanceSetManager,
+                                              KeBalanceSetManager,  // 定期检查并管理进程的工作集
                                               NULL))) {
 
             return FALSE;
@@ -2343,7 +2343,7 @@ Environment:
                                               &ObjectAttributes,
                                               0L,
                                               NULL,
-                                              KeSwapProcessOrStack,
+                                              KeSwapProcessOrStack,  // 控制进程和内核栈的换入和换出
                                               NULL))) {
 
             return FALSE;
@@ -2351,7 +2351,7 @@ Environment:
         ZwClose (ThreadHandle);
 
 #if !defined(NT_UP)
-        MiStartZeroPageWorkers ();
+        MiStartZeroPageWorkers ();  // 启动零化页面的系统辅助线程
 #endif
 
 #if defined(_X86_)
@@ -2359,7 +2359,7 @@ Environment:
 #endif
 
         ExAcquireResourceExclusiveLite (&PsLoadedModuleResource, TRUE);
-
+		// 对 所有已加载的模块，调用MiWriteProtectSystemImage函数，以设置保护属性
         NextEntry = PsLoadedModuleList.Flink;
 
         for ( ; NextEntry != &PsLoadedModuleList; NextEntry = NextEntry->Flink) {
@@ -2388,7 +2388,7 @@ Environment:
     }
 
     if (Phase == 2) {
-        MiEnablePagingTheExecutive ();
+        MiEnablePagingTheExecutive ();  // 变成可换页代码区
         return TRUE;
     }
 
@@ -3442,7 +3442,7 @@ Environment:
 #endif
 
     Size = (Size + (PTE_PER_PAGE - 1)) / PTE_PER_PAGE;
-    MmSizeOfPagedPoolInBytes = (ULONG_PTR)Size * PAGE_SIZE * PTE_PER_PAGE;
+    MmSizeOfPagedPoolInBytes = (ULONG_PTR)Size * PAGE_SIZE * PTE_PER_PAGE; // 系统换页内存池大小
 
     //
     // Set size to the number of pages in the pool.
@@ -3625,14 +3625,14 @@ Environment:
 
     //
     // Build bitmaps for paged pool.
-    //
+    // 在非换页内存池创建大小等于页面数量的位图
 
     MiCreateBitMap (&MmPagedPoolInfo.PagedPoolAllocationMap, Size, NonPagedPool);
     RtlSetAllBits (MmPagedPoolInfo.PagedPoolAllocationMap);
 
     //
     // Indicate first page worth of PTEs are available.
-    //
+    // 清0
 
     RtlClearBits (MmPagedPoolInfo.PagedPoolAllocationMap, 0, PTE_PER_PAGE);
 
@@ -3650,13 +3650,13 @@ Environment:
 
     //
     // Initialize paged pool.
-    //
+    // 初始化执行体换页内存池
 
     InitializePool (PagedPool, 0L);
 
     //
     // If paged pool is really nonpageable then allocate the memory now.
-    //
+    // 有MM_PAGED_POOL_LOCKED_DOWN标签，则换页内存池实际为非换页内存池
 
     if (MmDisablePagingExecutive & MM_PAGED_POOL_LOCKED_DOWN) {
 
@@ -3759,7 +3759,7 @@ Environment:
 
     //
     // Initialize the default paged pool signaling thresholds.
-    //
+    // 设置预警阀值
 
     MiLowPagedPoolThreshold = (30 * 1024 * 1024) >> PAGE_SHIFT;
 
@@ -4582,7 +4582,7 @@ restart:
                         StartSectionTableEntry += 1;
                     }
 
-                    MiEnablePagingOfDriverAtInit (PointerPte, LastPte);
+                    MiEnablePagingOfDriverAtInit (PointerPte, LastPte);  //  改PTE中的标记，使PTE在内存紧缺时，腾出物理内存页面
 
                     UNLOCK_PFN (OldIrql);
                     UNLOCK_SYSTEM_WS (CurrentThread);

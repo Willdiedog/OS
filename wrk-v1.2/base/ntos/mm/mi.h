@@ -1939,7 +1939,7 @@ MiDetermineNode (
 
 #endif
 
-extern PFN_NUMBER MmDynamicPfn;
+extern PFN_NUMBER MmDynamicPfn;  // 最高可用的物理地址页编号
 
 extern EX_PUSH_LOCK MmDynamicMemoryLock;
 
@@ -4259,13 +4259,13 @@ typedef struct _MMPAGING_FILE {
 
 //
 // System PTE structures.
-//
+// 系统页表结构
 
 typedef struct _MMFREE_POOL_ENTRY {
-    LIST_ENTRY List;        // maintained free&chk, 1st entry only
-    PFN_NUMBER Size;        // maintained free&chk, 1st entry only
+    LIST_ENTRY List;        // maintained free&chk, 1st entry only 页链表
+    PFN_NUMBER Size;        // maintained free&chk, 1st entry only  页面数
     ULONG Signature;        // maintained chk only, all entries
-    struct _MMFREE_POOL_ENTRY *Owner; // maintained free&chk, all entries
+    struct _MMFREE_POOL_ENTRY *Owner; // maintained free&chk, all entries  指向第一个页面
 } MMFREE_POOL_ENTRY, *PMMFREE_POOL_ENTRY;
 
 
@@ -7381,7 +7381,7 @@ extern PFN_COUNT MmNumberOfPhysicalPages;
 
 //
 // Highest possible physical page number in the system.
-//
+// 系统最高可能的物理页面数
 
 extern PFN_NUMBER MmHighestPossiblePhysicalPage;
 
@@ -7553,9 +7553,9 @@ extern LOGICAL MmProtectFreedNonPagedPool;
 
 //
 // Pool sizes.
-//
+// 各内存空间数
 
-extern SIZE_T MmSizeOfNonPagedPoolInBytes;
+extern SIZE_T MmSizeOfNonPagedPoolInBytes; // 非换页内存池大小
 
 extern SIZE_T MmMinimumNonPagedPoolSize;
 
@@ -7608,7 +7608,7 @@ extern ULONG MmFlushCounter;
 
 //
 // Pool start and end.
-//
+// 非换页、换页内存始末指针
 
 extern PVOID MmNonPagedPoolStart;
 
@@ -7710,22 +7710,22 @@ Environment:
 }
 //
 // Pool bit maps and other related structures.
-//
+// 换页内存池  
 
 typedef struct _MM_PAGED_POOL_INFO {
 
-    PRTL_BITMAP PagedPoolAllocationMap;
-    PRTL_BITMAP EndOfPagedPoolBitmap;
-    PMMPTE FirstPteForPagedPool;
-    PMMPTE LastPteForPagedPool;
-    PMMPTE NextPdeForPagedPoolExpansion;
-    ULONG PagedPoolHint;
-    SIZE_T PagedPoolCommit;
-    SIZE_T AllocatedPagedPool;
+    PRTL_BITMAP PagedPoolAllocationMap;  // 位图表示页面分配状态
+    PRTL_BITMAP EndOfPagedPoolBitmap;    // 位图用于标记内存申请的最后一个页面
+    PMMPTE FirstPteForPagedPool;   // 内存池起始地址
+    PMMPTE LastPteForPagedPool;    // 内存池结束地址
+    PMMPTE NextPdeForPagedPoolExpansion;  // 内存池的下次扩展位置
+    ULONG PagedPoolHint;      // 分配页面时的起始搜索位置
+    SIZE_T PagedPoolCommit;   // 有多少页面已分配到了内存(已提交，未必有对应物理页面)
+    SIZE_T AllocatedPagedPool; // 已分配的页面数
 
 } MM_PAGED_POOL_INFO, *PMM_PAGED_POOL_INFO;
 
-extern MM_PAGED_POOL_INFO MmPagedPoolInfo;
+extern MM_PAGED_POOL_INFO MmPagedPoolInfo;  // 系统全局换页内存池
 
 extern PRTL_BITMAP VerifierLargePagedPoolMap;
 
@@ -8646,7 +8646,7 @@ typedef struct _MM_SESSION_SPACE {
 
     KGUARDED_MUTEX PagedPoolMutex;
 
-    MM_PAGED_POOL_INFO PagedPoolInfo;
+    MM_PAGED_POOL_INFO PagedPoolInfo;  // 会话换页内存池
 
     //
     // Working set information.

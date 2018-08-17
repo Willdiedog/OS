@@ -65,8 +65,8 @@ PFN_NUMBER MmAllocatedNonPagedPool;
 PFN_NUMBER MiStartOfInitialPoolFrame;
 PFN_NUMBER MiEndOfInitialPoolFrame;
 
-PVOID MmNonPagedPoolEnd0;
-PVOID MmNonPagedPoolExpansionStart;
+PVOID MmNonPagedPoolEnd0;  // 基本内存池
+PVOID MmNonPagedPoolExpansionStart; // 扩展内存池  内存不够时，分配
 
 LIST_ENTRY MmNonPagedPoolFreeListHead[MI_MAX_FREE_LIST_HEADS];
 
@@ -3167,7 +3167,7 @@ Environment:
             }
         }
 
-        if ((NumberOfPages == 1) &&
+        if ((NumberOfPages == 1) &&  // 但页面链表缓存，最多8个元素
             (ExQueryDepthSList (&MiPagedPoolSListHead) < MiPagedPoolSListMaximum)) {
             InterlockedPushEntrySList (&MiPagedPoolSListHead,
                                        (PSLIST_ENTRY) StartingAddress);
@@ -3466,7 +3466,7 @@ Environment:
 
     //
     // Initialize the list heads for free pages.
-    //
+    // 初始化非换页内存池链表头数组
 
     for (Index = 0; Index < MI_MAX_FREE_LIST_HEADS; Index += 1) {
         InitializeListHead (&MmNonPagedPoolFreeListHead[Index]);
@@ -3474,7 +3474,7 @@ Environment:
 
     //
     // Set up the non paged pool pages.
-    //
+    // 创建非换页内存 
 
     FreeEntry = (PMMFREE_POOL_ENTRY) MmNonPagedPoolStart;
     FirstEntry = FreeEntry;
@@ -3507,7 +3507,7 @@ Environment:
 
     //
     // Initialize the first nonpaged pool PFN.
-    //
+    // MiStartOfInitialPoolFrame 非换页内存池的起始物理页面帧
 
     if (MI_IS_PHYSICAL_ADDRESS(MmNonPagedPoolStart)) {
         PageFrameIndex = MI_CONVERT_PHYSICAL_TO_PFN (MmNonPagedPoolStart);
@@ -3536,7 +3536,7 @@ Environment:
         ASSERT (PointerPte->u.Hard.Valid == 1);
         PageFrameIndex = MI_GET_PAGE_FRAME_FROM_PTE (PointerPte);
     }
-    MiEndOfInitialPoolFrame = PageFrameIndex;
+    MiEndOfInitialPoolFrame = PageFrameIndex;  // 结束物理页面帧
 
     //
     // Set up the system PTEs for nonpaged pool expansion.
