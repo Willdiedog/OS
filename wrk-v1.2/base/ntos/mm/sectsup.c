@@ -965,7 +965,7 @@ Routine Description:
     This function creates the section object type descriptor at system
     initialization and stores the address of the object type descriptor
     in global storage.
-
+	创建"\\Device\\PhysicalMemory"内存区对象  可用于直接把物理内存映射到进程地址空间
 Arguments:
 
     None.
@@ -1086,7 +1086,7 @@ Return Value:
     //
     // Now that the segment object is created, create a section object
     // which refers to the segment object.
-    //
+    // 
 
 #define DEVICE_PHYSICAL_MEMORY L"\\Device\\PhysicalMemory"
 

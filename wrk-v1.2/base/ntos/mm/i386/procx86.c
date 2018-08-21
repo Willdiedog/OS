@@ -27,9 +27,9 @@ extern SIZE_T MmProcessCommit;
 
 BOOLEAN
 MmCreateProcessAddressSpace (
-    IN ULONG MinimumWorkingSetSize,
-    IN PEPROCESS NewProcess,
-    OUT PULONG_PTR DirectoryTableBase
+    IN ULONG MinimumWorkingSetSize,   // 最小工作集大小
+    IN PEPROCESS NewProcess,          // 进程对象
+    OUT PULONG_PTR DirectoryTableBase // 页目录地址
     )
 
 /*++
@@ -85,7 +85,7 @@ Environment:
     // Charge commitment for the page directory pages, working set page table
     // page, and working set list.  If Vad bitmap lookups are enabled, then
     // charge for a page or two for that as well.
-    //
+    // 确保系统有足够的页面文件空间
 
     if (MiChargeCommitment (MM_PROCESS_COMMIT_CHARGE, NULL) == FALSE) {
         return FALSE;
@@ -105,7 +105,7 @@ Environment:
 
     //
     // Check to make sure the physical pages are available.
-    //
+    // 可用物理页面
 
     if (MI_NONPAGEABLE_MEMORY_AVAILABLE() <= (SPFN_NUMBER)MinimumWorkingSetSize){
 
@@ -126,7 +126,7 @@ Environment:
 
     //
     // Allocate a page directory page.
-    //
+    // 页目录(物理页面)
 
     if (MmAvailablePages < MM_HIGH_LIMIT) {
         MiEnsureAvailablePageOrWait (NULL, OldIrql);
@@ -146,7 +146,7 @@ Environment:
 
     //
     // Allocate the hyper space page table page.
-    //
+    // 超空间页表页面
 
     if (MmAvailablePages < MM_HIGH_LIMIT) {
         MiEnsureAvailablePageOrWait (NULL, OldIrql);
@@ -166,7 +166,7 @@ Environment:
 
     //
     // Remove page(s) for the VAD bitmap.
-    //
+    // VAD位图
 
     if (MmAvailablePages < MM_HIGH_LIMIT) {
         MiEnsureAvailablePageOrWait (NULL, OldIrql);
@@ -186,7 +186,7 @@ Environment:
 
     //
     // Remove a page for the working set list.
-    //
+    // 工作集链表
 
     if (MmAvailablePages < MM_HIGH_LIMIT) {
         MiEnsureAvailablePageOrWait (NULL, OldIrql);
@@ -224,7 +224,7 @@ Environment:
 
     //
     // Initialize the page reserved for hyper space.
-    //
+    // 初始化超空间页表页面
 
     TempPte = ValidPdePde;
     MI_SET_GLOBAL_STATE (TempPte, 0);
@@ -267,7 +267,7 @@ Environment:
 
     Pfn1 = MI_PFN_ELEMENT (PageDirectoryIndex);
 
-    Pfn1->PteAddress = (PMMPTE)PDE_BASE;
+    Pfn1->PteAddress = (PMMPTE)PDE_BASE; // 设置页目录页面的PTE地址 0xC0300000
 
     TempPte = ValidPdePde;
     TempPte.u.Hard.PageFrameNumber = HyperSpaceIndex;
@@ -283,13 +283,13 @@ Environment:
 
     LOCK_EXPANSION (OldIrql);
 
-    InsertTailList (&MmProcessList, &NewProcess->MmProcessLinks);
+    InsertTailList (&MmProcessList, &NewProcess->MmProcessLinks);  // 新进程加入系统进程链表中
 
     UNLOCK_EXPANSION (OldIrql);
 
     //
     // Map the page directory page in hyperspace.
-    //
+    // 初始化页目录页面
 
     MappingPte = MiReserveSystemPtes (1, SystemPteSpace);
 
@@ -354,7 +354,7 @@ Environment:
 
     //
     // Up the session space reference count.
-    //
+    // 把新进程加入到当前进程所在的会话空间(MmSessionSpace)中
 
     MiSessionAddProcess (NewProcess);
 

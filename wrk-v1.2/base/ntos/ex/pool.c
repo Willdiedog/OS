@@ -306,7 +306,7 @@ ULONG ExPoolFailures;
 // time.
 //
 
-ULONG ExpNumberOfPagedPools = NUMBER_OF_PAGED_POOLS;
+ULONG ExpNumberOfPagedPools = NUMBER_OF_PAGED_POOLS;   // 多个换页内存池，增加并发性（多线程、多处理器同时使用不同的换页内存池）
 
 ULONG ExpNumberOfNonPagedPools = 1;
 
@@ -716,7 +716,7 @@ Return Value:
     PoolDescriptor->PendingFreeDepth = 0;
 
     //
-    // Initialize the allocation listheads.
+    // Initialize the allocation 4.
     //
 
     ListEntry = PoolDescriptor->ListHeads;
@@ -2363,7 +2363,7 @@ restart2:
 
     //
     // Walk the listheads looking for a free block.
-    //
+    // 在快查表中查找空闲内存块
 
     do {
 
@@ -2380,10 +2380,10 @@ restart2:
 
                 //
                 // The block is no longer available, march on.
-                //
+                // 
 
                 UNLOCK_POOL (PoolDesc, LockHandle);
-                ListHead += 1;
+                ListHead += 1;  // 往大内存块找
                 continue;
             }
 
@@ -2406,20 +2406,20 @@ restart2:
                 // The selected block is larger than the allocation
                 // request. Split the block and insert the remaining
                 // fragment in the appropriate list.
-                //
+                // 内存大，分割成两块
                 // If the entry is at the start of a page, then take
                 // the allocation from the front of the block so as
                 // to minimize fragmentation. Otherwise, take the
                 // allocation from the end of the block which may
                 // also reduce fragmentation if the block is at the
                 // end of a page.
-                //
+                // 页起始，非也起始
 
                 if (Entry->PreviousSize == 0) {
 
                     //
                     // The entry is at the start of a page.
-                    //
+                    // entry指向页的起始位置
 
                     SplitEntry = (PPOOL_HEADER)((PPOOL_BLOCK)Entry + NeededSize);
                     SplitEntry->BlockSize = (USHORT)(Entry->BlockSize - NeededSize);
@@ -2428,7 +2428,7 @@ restart2:
                     //
                     // If the allocated block is not at the end of a
                     // page, then adjust the size of the next block.
-                    //
+                    // 
 
                     NextEntry = (PPOOL_HEADER)((PPOOL_BLOCK)SplitEntry + SplitEntry->BlockSize);
                     if (PAGE_END(NextEntry) == FALSE) {
@@ -2527,7 +2527,7 @@ restart2:
     // no large blocks that can be split to satisfy the allocation.
     // Attempt to expand the pool by allocating another page and
     // adding it to the pool.
-    //
+    // 未找到有效空闲内存块，申请新页面
 
     Entry = (PPOOL_HEADER) MiAllocatePoolPages (RequestType, PAGE_SIZE);
 

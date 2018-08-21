@@ -864,7 +864,7 @@ Return Value:
     
     //
     // Map the view base on the type.
-    //
+    // 根据内存数据类型 映射视图
 
     if (ControlArea->u.Flags.PhysicalMemory) {
 
@@ -3521,7 +3521,7 @@ Routine Description:
 
     This routine maps the specified mapped file or pagefile-backed section
     into the specified process's address space.
-
+	把内存区对象描述的存储资源映射到进程的地址空间中
 Arguments:
 
     see MmMapViewOfSection above...
@@ -3577,7 +3577,7 @@ Environment:
     //
     // Check to see if there is a purge operation ongoing for
     // this segment.
-    //
+    // 
 
     if ((AllocationType & MEM_DOS_LIM) != 0) {
         if ((*CapturedBase == NULL) ||
@@ -3739,7 +3739,7 @@ Environment:
         //
         // The section is not based,
         // find an empty range starting on a 64k boundary.
-        //
+        // 在进程的虚拟空间中找到一段包含指定大小的地址范围
 
         if ((AllocationType & MEM_TOP_DOWN) || (Process->VmTopDown == 1)) {
 

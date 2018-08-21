@@ -1178,19 +1178,19 @@ typedef struct _KPRCB {
 
 //
 // Nonpaged per processor lookaside lists - 64-byte aligned.
-//
+// 
 
     PP_LOOKASIDE_LIST PPLookasideList[16];
 
 //
 // Nonpaged per processor small pool lookaside lists - 64-byte aligned.
-//
+// ·Ç»»Ò³ÄÚ´æ³Ø»º´æÁ´±í
 
     PP_LOOKASIDE_LIST PPNPagedLookasideList[POOL_SMALL_LISTS];
 
 //
 // Paged per processor small pool lookaside lists - 64-byte aligned.
-//
+// »»Ò³ÄÚ´æ³Ø»º´æÁ´±í  
 
     PP_LOOKASIDE_LIST PPPagedLookasideList[POOL_SMALL_LISTS];
 

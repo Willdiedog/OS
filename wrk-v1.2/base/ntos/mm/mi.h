@@ -3451,9 +3451,9 @@ typedef struct _SEGMENT_FLAGS {
 #endif
 } SEGMENT_FLAGS, *PSEGMENT_FLAGS;
 
-typedef struct _SEGMENT {
-    struct _CONTROL_AREA *ControlArea;
-    ULONG TotalNumberOfPtes;
+typedef struct _SEGMENT {  // 段对象  Paged
+    struct _CONTROL_AREA *ControlArea;  // 控制区对象，维护I/O操作所必须的信息 
+    ULONG TotalNumberOfPtes; // 页面数
     ULONG NonExtendedPtes;
     ULONG Spare0;
 
@@ -3554,20 +3554,20 @@ typedef struct _MMSECTION_FLAGS {
     unsigned filler : 1;
 } MMSECTION_FLAGS;
 
-typedef struct _CONTROL_AREA {
-    PSEGMENT Segment;
+typedef struct _CONTROL_AREA {  // NoPage
+    PSEGMENT Segment;   // 真正描述内存区数据的对象
     LIST_ENTRY DereferenceList;
     ULONG NumberOfSectionReferences;    // All section refs & image flushes
     ULONG NumberOfPfnReferences;        // valid + transition prototype PTEs
     ULONG NumberOfMappedViews;          // total # mapped views, including
-                                        // system cache & system space views
+                                        // system cache & system space views  与之关联的内存区对象被映射了多少次
     ULONG NumberOfSystemCacheViews;     // system cache views only
     ULONG NumberOfUserReferences;       // user section & view references
     union {
         ULONG LongFlags;
         MMSECTION_FLAGS Flags;
     } u;
-    PFILE_OBJECT FilePointer;
+    PFILE_OBJECT FilePointer;  // 文件对象
     PEVENT_COUNTER WaitingForDeletion;
     USHORT ModifiedWriteCount;
     USHORT FlushInProgressCount;
@@ -3664,7 +3664,7 @@ typedef struct _MSUBSECTION { // Must start on quadword boundary and be quad siz
         ULONG LongFlags2;
         MMSUBSECTION_FLAGS2 SubsectionFlags2;
     } u2;
-} MSUBSECTION, *PMSUBSECTION;
+} MSUBSECTION, *PMSUBSECTION; // 子内存区对象，记录了从原型PTE到磁盘逻辑扇区之间的关联信息
 
 #define MI_MAXIMUM_SECTION_SIZE ((UINT64)16*1024*1024*1024*1024*1024 - ((UINT64)1<<MM4K_SHIFT))
 
@@ -3855,17 +3855,17 @@ typedef struct _MMINPAGE_SUPPORT {
 
 //
 // Section support.
-//
+// 内存区对象   物理内存、系统页面文件、其它文件
 
 typedef struct _SECTION {
-    MMADDRESS_NODE Address;
-    PSEGMENT Segment;
-    LARGE_INTEGER SizeOfSection;
+    MMADDRESS_NODE Address;   // 内存区的VAD节点
+    PSEGMENT Segment;         // 段对象
+    LARGE_INTEGER SizeOfSection; // 内存区的大小
     union {
         ULONG LongFlags;
         MMSECTION_FLAGS Flags;
     } u;
-    MM_PROTECTION_MASK InitialPageProtection;
+    MM_PROTECTION_MASK InitialPageProtection;  // 页面保护属性
 } SECTION, *PSECTION;
 
 //
@@ -3988,7 +3988,7 @@ typedef struct _MMVAD {
         MMVAD_FLAGS VadFlags;
     } u;
     PCONTROL_AREA ControlArea;
-    PMMPTE FirstPrototypePte;
+    PMMPTE FirstPrototypePte;  // 原型PTE
     PMMPTE LastContiguousPte;
     union {
         ULONG LongFlags2;

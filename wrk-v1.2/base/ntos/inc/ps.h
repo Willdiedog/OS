@@ -95,7 +95,7 @@ typedef struct _MMADDRESS_NODE {
     struct _MMADDRESS_NODE *RightChild;
     ULONG_PTR StartingVpn;
     ULONG_PTR EndingVpn;
-} MMADDRESS_NODE, *PMMADDRESS_NODE;
+} MMADDRESS_NODE, *PMMADDRESS_NODE;  // MMVAD
 
 //
 // A pair of macros to deal with the packing of parent & balance in the
@@ -112,7 +112,7 @@ typedef struct _MMADDRESS_NODE {
                 (PMMADDRESS_NODE)((ULONG_PTR)(ParentNode) | ((ExistingBalance) & 0x3))
 
 typedef struct _MM_AVL_TABLE {
-    MMADDRESS_NODE  BalancedRoot;
+    MMADDRESS_NODE  BalancedRoot;  // 平衡二叉树根节点
     ULONG_PTR DepthOfTree: 5;
     ULONG_PTR Unused: 3;
 #if defined (_WIN64)

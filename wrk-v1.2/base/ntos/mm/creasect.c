@@ -414,7 +414,7 @@ MmCreateSection (
 /*++
 
 Routine Description:
-
+	
     This function creates a section object and opens a handle to the object
     with the specified desired access.
 
@@ -433,7 +433,7 @@ Arguments:
 
          WRITE - Write access to the section is desired.
 
-    ObjectAttributes - Supplies a pointer to an object attributes structure.
+    ObjectAttributes - Supplies a pointer to an object attributes structure.   对象名，安全描述符 进程通过名称引用此内存对象(进程共享访问)
 
     InputMaximumSize - Supplies the maximum size of the section in bytes.
                        This value is rounded up to the host page size and
@@ -461,22 +461,22 @@ Arguments:
                     address space that receives the section.  This does not
                     imply that addresses are reserved for based sections.
                     Rather if the section cannot be mapped at the based address
-                    an error is returned.
+                    an error is returned.  在每个进程地址空间中相同的虚拟地址上分配
 
         SEC_RESERVE - All pages of the section are set to the
-                      reserved state.
+                      reserved state.  要求内存区所有的页面被保留
 
-        SEC_COMMIT - All pages of the section are set to the commit state.
+        SEC_COMMIT - All pages of the section are set to the commit state. 要求内存区所有的页面被提交
 
         SEC_IMAGE - The file specified by the file handle is an
-                    executable image file.
+                    executable image file.  FileHandle指定了一个可执行映像文件
 
         SEC_FILE - The file specified by the file handle is a mapped
                    file.  If a file handle is supplied and neither
                    SEC_IMAGE or SEC_FILE is supplied, SEC_FILE is
-                   assumed.
+                   assumed.  指定一个映像文件
 
-        SEC_LARGE_PAGES - The section will be created using large pages.
+        SEC_LARGE_PAGES - The section will be created using large pages.   内存区使用大页面，并且立即分配物理内存
                           This physical memory is allocated immediately upon
                           section creation (instead of upon access).  If
                           contiguous physical memory for the large page(s)
@@ -501,8 +501,8 @@ Arguments:
 
     FileHandle - Supplies an optional handle of an open file object.
                  If the value of this handle is null, then the
-                 section will be backed by a paging file. Otherwise
-                 the section is backed by the specified data file.
+                 section will be backed by a paging file. Otherwise  空， 则创建的内存对象映射到页面文件中 
+                 the section is backed by the specified data file.  非空，则创建的内存对象映射到文件中 file-backed section
 
     FileObject - Supplies an optional pointer to the file object.  If this
                  value is NULL and the FileHandle is NULL, then there is
@@ -1149,11 +1149,11 @@ RecheckSegment:
             //
             // The file does not have an associated segment, create a segment
             // object.
-            //
+            // 
 
             if (AllocationAttributes & SEC_IMAGE) {
 
-                Status = MiCreateImageFileMap (File, &Segment);
+                Status = MiCreateImageFileMap (File, &Segment);  // 可执行映像文件内存区
 
             }
             else {
@@ -1163,7 +1163,7 @@ RecheckSegment:
                                               MaximumSize,
                                               SectionPageProtection,
                                               AllocationAttributes,
-                                              IgnoreFileSizing);
+                                              IgnoreFileSizing);  // 数据文件映射内存区
                 ASSERT (PreviousSectionPointer == File->SectionObjectPointer);
             }
 
@@ -1254,7 +1254,7 @@ RecheckSegment:
         Status = MiCreatePagingFileMap (&NewSegment,
                                         MaximumSize,
                                         ProtectionMask,
-                                        AllocationAttributes);
+                                        AllocationAttributes);  // 由页文件支撑的内存区
 
         if (!NT_SUCCESS(Status)) {
             return Status;
@@ -2180,7 +2180,7 @@ Return Value:
     }
 
     RoundingAlignment = ImageAlignment;
-    NumberOfSubsections = FileHeader->NumberOfSections;
+    NumberOfSubsections = FileHeader->NumberOfSections;  // 要创建的子内存区对象个数
 
     if ((ImageAlignment >= PAGE_SIZE) || (CheckSplitPages == TRUE)) {
 
@@ -2239,7 +2239,7 @@ Return Value:
 
     NewSegment = ExAllocatePoolWithTag (PagedPool | POOL_MM_ALLOCATION,
                                         SizeOfSegment,
-                                        MMSECT);
+                                        MMSECT);  // 创建段对象
 
     if (NewSegment == NULL) {
 
@@ -4914,7 +4914,7 @@ Return Value:
 
         InterlockedExchangeAddSizeT (&MmSharedCommit, NumberOfPtes);
 
-        if (AllocationAttributes & SEC_LARGE_PAGES) {
+        if (AllocationAttributes & SEC_LARGE_PAGES) {  // 如为SEC_LARGE_PAGES内存区，则直接映射大页面物理内存
 
             NewSegment->SegmentFlags.LargePages = 1;
 

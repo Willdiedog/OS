@@ -61,10 +61,10 @@ extern ULONG MiSpecialPoolExtraCount;
 
 PVOID MiLowestSystemPteVirtualAddress;
 
-ULONG MmTotalSystemPtes;
+ULONG MmTotalSystemPtes;   // 数量
 ULONG MmTotalFreeSystemPtes[MaximumPtePoolTypes];
-PMMPTE MmSystemPtesStart[MaximumPtePoolTypes];
-PMMPTE MmSystemPtesEnd[MaximumPtePoolTypes];
+PMMPTE MmSystemPtesStart[MaximumPtePoolTypes];  // 起始
+PMMPTE MmSystemPtesEnd[MaximumPtePoolTypes];  // 结束
 ULONG MmPteFailures[MaximumPtePoolTypes];
 MMPTE MiAddPtesList;
 
@@ -122,7 +122,7 @@ ULONG MmSysPteIndex[MM_SYS_PTE_TABLES_MAX] = {1,2,4,8,MM_PTE_TABLE_LIMIT};
 
 UCHAR MmSysPteTables[MM_PTE_TABLE_LIMIT+1] = {0,0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4};
 
-ULONG MmSysPteMinimumFree [MM_SYS_PTE_TABLES_MAX] = {100,50,30,20,20};
+ULONG MmSysPteMinimumFree [MM_SYS_PTE_TABLES_MAX] = {100,50,30,20,20};  // 内存块最小阀值
 
 #endif
 
@@ -132,7 +132,7 @@ SLIST_HEADER MiSystemPteSListHead;
 #define MM_MIN_SYSPTE_FREE 500
 #define MM_MAX_SYSPTE_FREE 3000
 
-ULONG MmSysPteListBySizeCount [MM_SYS_PTE_TABLES_MAX];
+ULONG MmSysPteListBySizeCount [MM_SYS_PTE_TABLES_MAX];  // 内存块数量
 
 //
 // Initial sizes for PTE lists.
@@ -148,8 +148,8 @@ ULONG MmSysPteListBySizeCount [MM_SYS_PTE_TABLES_MAX];
 #define MM_PTE_LIST_18  40
 #define MM_PTE_LIST_19  40
 
-PVOID MiSystemPteNBHead[MM_SYS_PTE_TABLES_MAX];
-LONG MiSystemPteFreeCount[MM_SYS_PTE_TABLES_MAX];
+PVOID MiSystemPteNBHead[MM_SYS_PTE_TABLES_MAX];  // 连续页面内存块
+LONG MiSystemPteFreeCount[MM_SYS_PTE_TABLES_MAX]; 
 
 ULONG MiSysPteTimeStamp[MaximumPtePoolTypes];
 

@@ -1715,9 +1715,9 @@ typedef struct _DEVICE_HANDLER_OBJECT {
 //
 
 typedef struct _SECTION_OBJECT_POINTERS {
-    PVOID DataSectionObject;
+    PVOID DataSectionObject;  //  PCONTROL_AREA  数据文件映射
     PVOID SharedCacheMap;
-    PVOID ImageSectionObject;
+    PVOID ImageSectionObject; //  PCONTROL_AREA  可执行映像文件映射
 } SECTION_OBJECT_POINTERS;
 typedef SECTION_OBJECT_POINTERS *PSECTION_OBJECT_POINTERS;
 
@@ -1760,14 +1760,14 @@ typedef struct _IO_COMPLETION_CONTEXT {
 #define FO_FILE_OBJECT_HAS_EXTENSION    0x00800000
 #define FO_REMOTE_ORIGIN                0x01000000
 
-typedef struct _FILE_OBJECT {
+typedef struct _FILE_OBJECT {  // 文件对象
     CSHORT Type;
     CSHORT Size;
     PDEVICE_OBJECT DeviceObject;
     PVPB Vpb;
     PVOID FsContext;
     PVOID FsContext2;
-    PSECTION_OBJECT_POINTERS SectionObjectPointer;
+    PSECTION_OBJECT_POINTERS SectionObjectPointer; // 内存区对象
     PVOID PrivateCacheMap;
     NTSTATUS FinalStatus;
     struct _FILE_OBJECT *RelatedFileObject;

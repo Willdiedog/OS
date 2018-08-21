@@ -602,8 +602,8 @@ Environment:
 NTSTATUS
 MmInitializeProcessAddressSpace (
     IN PEPROCESS ProcessToInitialize,
-    IN PEPROCESS ProcessToClone OPTIONAL,
-    IN PVOID SectionToMap OPTIONAL,
+    IN PEPROCESS ProcessToClone OPTIONAL,  // 新进程地址空间可以容该进程拷贝获得
+    IN PVOID SectionToMap OPTIONAL,  // 内存区对象，在新进程地址空间中，映射此对象
     IN OUT PULONG CreateFlags,
     OUT POBJECT_NAME_INFORMATION *AuditName OPTIONAL
     )
@@ -736,7 +736,7 @@ Environment:
 
     //
     // Initialize Working Set Mutex in process header.
-    //
+    // 在进程头初始化工作集锁
 
     KeAttachProcess (&ProcessToInitialize->Pcb);
 
@@ -773,7 +773,7 @@ Environment:
     //
     // Initialize the PFN database for the Page Directory and the
     // PDE which maps hyper space.
-    //
+    // 为页目录初始化页帧号数据库，并将其映射到超空间
 
 #if (_MI_PAGING_LEVELS >= 3)
 
@@ -1226,7 +1226,7 @@ Environment:
 
 #endif
 
-    if (SectionToMap != NULL) {
+    if (SectionToMap != NULL) {  // 内存区对象
 
         //
         // Map the specified section into the address space of the

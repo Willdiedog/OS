@@ -2503,30 +2503,30 @@ typedef struct _MMPTE_LIST {
 //
 // A Page Table Entry on the x86 has the following definition.
 // Note the MP version is to avoid stalls when flushing TBs across processors.
-//
+// 页表实体
 
 typedef struct _MMPTE_HARDWARE {
-    ULONG Valid : 1;
+    ULONG Valid : 1;   // PTE: 是否有效     PDE: 0,则换入物理内存
 #if defined(NT_UP)
     ULONG Write : 1;       // UP version
 #else
     ULONG Writable : 1;    // changed for MP version
 #endif
-    ULONG Owner : 1;
-    ULONG WriteThrough : 1;
-    ULONG CacheDisable : 1;
-    ULONG Accessed : 1;
-    ULONG Dirty : 1;
-    ULONG LargePage : 1;
-    ULONG Global : 1;
+    ULONG Owner : 1;   // 0-内核模式访问  1-用户模式访问
+    ULONG WriteThrough : 1;  // 直接写内存或写回缓存
+    ULONG CacheDisable : 1;  // 该页面禁止缓存
+    ULONG Accessed : 1;      // 页面已被访问过(读/写)
+    ULONG Dirty : 1;         // 页面已被写过
+    ULONG LargePage : 1;     // 大页面PDE
+    ULONG Global : 1;        // 此PTE适用于所有进程
     ULONG CopyOnWrite : 1; // software field
     ULONG Prototype : 1;   // software field
 #if defined(NT_UP)
     ULONG reserved : 1;    // software field
 #else
-    ULONG Write : 1;       // software field - MP change
+    ULONG Write : 1;       // software field - MP change  软件控制的位，仅适用于多核处理器系统，指明可读写或只读
 #endif
-    ULONG PageFrameNumber : 20;
+    ULONG PageFrameNumber : 20;  // 页帧编号，指向对应的物理页面的地址
 } MMPTE_HARDWARE, *PMMPTE_HARDWARE;
 
 #if defined(NT_UP)

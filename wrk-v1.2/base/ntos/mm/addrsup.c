@@ -212,7 +212,7 @@ ULONG MiWorstCaseFill[33] = {
 TABLE_SEARCH_RESULT
 MiFindNodeOrParent (
     IN PMM_AVL_TABLE Table,
-    IN ULONG_PTR StartingVpn,
+    IN ULONG_PTR StartingVpn,  // 找到包含StartingVpn虚拟地址的AVL节点
     OUT PMMADDRESS_NODE *NodeOrParent
     )
 
@@ -1803,7 +1803,7 @@ MiFindEmptyAddressRangeInTree (
     )
 
 /*++
-
+	查找相邻VAD间的地址间隔
 Routine Description:
 
     The function examines the virtual address descriptors to locate
