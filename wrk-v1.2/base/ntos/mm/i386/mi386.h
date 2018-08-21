@@ -2437,7 +2437,7 @@ extern ULONG MmTotalPagesForPagingFile;
 
 //
 // A VALID Page Table Entry on the x86 has the following definition.
-//
+// 无效PTE定义
 
 #define MI_MAXIMUM_PAGEFILE_SIZE (((UINT64)1 * 1024 * 1024 - 1) * PAGE_SIZE)
 
@@ -2464,14 +2464,14 @@ typedef struct _MMPTE_TRANSITION {
     ULONG PageFrameNumber : 20;
 } MMPTE_TRANSITION;
 
-typedef struct _MMPTE_PROTOTYPE {
+typedef struct _MMPTE_PROTOTYPE {  // 原型PTE定义  可以描述6种状态的页面：有效、位于页面文件中、位于映射文件中、要求零页面、转移、页面已修改但不写回磁盘
     ULONG Valid : 1;
     ULONG ProtoAddressLow : 7;
     ULONG ReadOnly : 1;  // if set allow read only access.
     ULONG WhichPool : 1;
     ULONG Prototype : 1;
     ULONG ProtoAddressHigh : 21;
-} MMPTE_PROTOTYPE;
+} MMPTE_PROTOTYPE;  // p256
 
 typedef struct _MMPTE_SUBSECTION {
     ULONG Valid : 1;
@@ -2544,14 +2544,14 @@ typedef struct _MMPTE_HARDWARE {
 #define MI_GET_PROTECTION_FROM_SOFT_PTE(PTE) ((PTE)->u.Soft.Protection)
 #define MI_GET_PROTECTION_FROM_TRANSITION_PTE(PTE) ((PTE)->u.Trans.Protection)
 
-typedef struct _MMPTE {
+typedef struct _MMPTE {  // PTE
     union  {
         ULONG Long;
         HARDWARE_PTE Flush;
-        MMPTE_HARDWARE Hard;
-        MMPTE_PROTOTYPE Proto;
-        MMPTE_SOFTWARE Soft;
-        MMPTE_TRANSITION Trans;
+        MMPTE_HARDWARE Hard;  // Vad=1 有效PTE Vad=0无效PTE
+        MMPTE_PROTOTYPE Proto;// 原型PTE(PTE初始值)
+        MMPTE_SOFTWARE Soft;  // 无效PTE表示方法
+        MMPTE_TRANSITION Trans;// 无效PTE表示方法
         MMPTE_SUBSECTION Subsect;
         MMPTE_LIST List;
         } u;

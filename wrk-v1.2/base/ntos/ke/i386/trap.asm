@@ -5512,7 +5512,7 @@ Kt0e01:
 ; of the fault is 2, _MmAccessFault will return appropriate error code
 ;
 
-        push    ebp                     ; set trap frame address
+        push    ebp                     ; set trap frame address  ¹¹ÔìÏİÚåÖ¡
         mov     eax, [ebp]+TsSegCs      ; set previous mode
         and     eax, MODE_MASK          ;
         push    eax                     ;
