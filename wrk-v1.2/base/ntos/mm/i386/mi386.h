@@ -2503,14 +2503,14 @@ typedef struct _MMPTE_LIST {
 //
 // A Page Table Entry on the x86 has the following definition.
 // Note the MP version is to avoid stalls when flushing TBs across processors.
-// 页表实体
+// PTE PDE数据格式   只有LargePage值为PDE私有
 
 typedef struct _MMPTE_HARDWARE {
-    ULONG Valid : 1;   // PTE: 是否有效     PDE: 0,则换入物理内存
+    ULONG Valid : 1;   // PTE: 是否有效     PDE: 0,则换入物理内存   指明此虚拟地址是否映射到一个物理内存
 #if defined(NT_UP)
     ULONG Write : 1;       // UP version
 #else
-    ULONG Writable : 1;    // changed for MP version
+    ULONG Writable : 1;    // changed for MP version  多处理器：指明是否可写
 #endif
     ULONG Owner : 1;   // 0-内核模式访问  1-用户模式访问
     ULONG WriteThrough : 1;  // 直接写内存或写回缓存
