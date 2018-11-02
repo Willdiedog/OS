@@ -3844,7 +3844,7 @@ Environment:
             PteFlushList->Count += 1;
         }
 
-        MiDecrementShareCount (Pfn2, PageFrameIndex);
+        MiDecrementShareCount (Pfn2, PageFrameIndex); // 将页面的PFN项插入到备用链表或修改链表中
         PointerPte -= 1;
         Count += 1;
         BaseOfKernelStack = ((PCHAR)BaseOfKernelStack - PAGE_SIZE);
@@ -4019,7 +4019,7 @@ Environment:
         LocalStackInfo.ActualLimit = LocalStackInfo.StackBase - KERNEL_STACK_SIZE;
     }
 
-    MiOutPageSingleKernelStack (Thread, &LocalStackInfo, &PteFlushList);
+    MiOutPageSingleKernelStack (Thread, &LocalStackInfo, &PteFlushList); // 将内核栈页面变成转移状态
 
     }
 
@@ -4543,7 +4543,7 @@ Return Value:
     // able to proceed below.
     //
 
-    if (OutProcess->Vm.WorkingSetSize == MM_PROCESS_COMMIT_CHARGE) {
+    if (OutProcess->Vm.WorkingSetSize == MM_PROCESS_COMMIT_CHARGE) {  // 进程的工作集降低到最小，进程执行换出
 
         LOCK_EXPANSION (OldIrql);
 
@@ -4605,7 +4605,7 @@ Return Value:
 
         //
         // Put the working set list table PTE into transition.
-        //
+        // 工作集变为转移状态
 
         TempPte = HyperSpacePageTableMap[MiGetPteOffset(MmWorkingSetList)];
 
@@ -4615,7 +4615,7 @@ Return Value:
 
         //
         // Put the VAD bitmap PTE into transition.
-        //
+        // VAD位图页面变为转移状态
 
         PointerPte = &HyperSpacePageTableMap[MiGetPteOffset (VAD_BITMAP_SPACE)];
         TempPte2 = *PointerPte;
@@ -4656,7 +4656,7 @@ Return Value:
 
         //
         // Remove the hyper space page table from the process.
-        //
+        // 超空间页表页面
 
         PageDirectoryMap = NULL;
 
@@ -4727,7 +4727,7 @@ Return Value:
 
         //
         // Remove the top level page directory page.
-        //
+        // 页目录页面
 
         TempPte = PageDirectoryMap[MiGetPdeOffset(PDE_BASE)];
 
@@ -4755,7 +4755,7 @@ Return Value:
         //
         // Now acquire the PFN lock and free all the pages whose PTEs we
         // put in transition above.
-        //
+        // PTE变成转移状态
 
         LOCK_PFN (OldIrql);
 

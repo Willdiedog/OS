@@ -10328,8 +10328,8 @@ MiAllocatePagesForMdl (
     IN ULONG Flags
     )
 
-/*++
-
+/*++ 申请没有映射到虚拟地址空间的物理内存，返回一个MDL对象  
+     MDL  Memory Discriptor List
 Routine Description:
 
     This routine searches the PFN database for free, zeroed or standby pages

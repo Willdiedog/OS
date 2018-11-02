@@ -49,10 +49,10 @@ MiInPageAllowed (
 
 NTSTATUS
 MmAccessFault (
-    IN ULONG_PTR FaultStatus,
-    IN PVOID VirtualAddress,
-    IN KPROCESSOR_MODE PreviousMode,
-    IN PVOID TrapInformation
+    IN ULONG_PTR FaultStatus, // 页面错误的状态信息位
+    IN PVOID VirtualAddress,  // 发生页面错误的虚拟地址
+    IN KPROCESSOR_MODE PreviousMode, // 此页面错误在哪个模式下发生的
+    IN PVOID TrapInformation  // 页面错误陷阱帧的地址
     )
 
 /*++
@@ -132,11 +132,11 @@ Environment:
     // If the address is not canonical then return FALSE as the caller (which
     // may be the kernel debugger) is not expecting to get an unimplemented
     // address bit fault.
-    //
+    // 
 
     if (MI_RESERVED_BITS_CANONICAL(VirtualAddress) == FALSE) {
 
-        if (PreviousMode == UserMode) {
+        if (PreviousMode == UserMode) {   // 只允许内核模式访问
             return STATUS_ACCESS_VIOLATION;
         }
 
@@ -153,9 +153,9 @@ Environment:
 
     PreviousIrql = KeGetCurrentIrql ();
 
-    //
+    // 检查虚拟地址值是否有效
     // Get the pointer to the PDE and the PTE for this page.
-    //
+    // 获取PDE和PTE
 
     PointerPte = MiGetPteAddress (VirtualAddress);
     PointerPde = MiGetPdeAddress (VirtualAddress);
@@ -170,7 +170,7 @@ Environment:
     }
 #endif
 
-    if (PreviousIrql > APC_LEVEL) {
+    if (PreviousIrql > APC_LEVEL) {  // 中断请求级别大于APC_LEVEL的
 
         //
         // The PFN database lock is an executive spin-lock.  The pager could
@@ -179,7 +179,7 @@ Environment:
         //
 
 #if (_MI_PAGING_LEVELS < 3)
-        MiCheckPdeForPagedPool (VirtualAddress);
+        MiCheckPdeForPagedPool (VirtualAddress);  // 检查PDE
 #endif
 
         if (
@@ -193,7 +193,7 @@ Environment:
 
             ((!MI_PDE_MAPS_LARGE_PAGE (PointerPde)) && (PointerPte->u.Hard.Valid == 0))) {
 
-            if (KeInvalidAccessAllowed (TrapInformation) == TRUE) {
+            if (KeInvalidAccessAllowed (TrapInformation) == TRUE) {  // 检查执行权限
                 return STATUS_ACCESS_VIOLATION;
             }
 
@@ -229,7 +229,7 @@ Environment:
         }
 
         if ((MI_FAULT_STATUS_INDICATES_WRITE (FaultStatus)) &&
-            (PointerPte->u.Hard.CopyOnWrite != 0)) {
+            (PointerPte->u.Hard.CopyOnWrite != 0)) { // 检查PTE
 
             KdPrint(("MM:***PAGE FAULT AT IRQL > 1  Va %p, IRQL %lx\n",
                      VirtualAddress,
@@ -256,7 +256,7 @@ Environment:
 
             if (MiCheckSystemPteProtection (
                                 MI_FAULT_STATUS_INDICATES_WRITE (FaultStatus),
-                                VirtualAddress) == TRUE) {
+                                VirtualAddress) == TRUE) {  // 虚拟地址是否在系统全局设定的PTE映射保护区
 
                 return STATUS_SUCCESS;
             }
@@ -267,7 +267,7 @@ Environment:
         // have faulted the PTE in already, or the access bit
         // is clear and this is a access fault - blindly set the
         // access bit and dismiss the fault.
-        //
+        // 检查写访问
 
         if (MI_FAULT_STATUS_INDICATES_WRITE(FaultStatus)) {
 
@@ -286,7 +286,7 @@ Environment:
 
         //
         // Ensure execute access is enabled in the PTE.
-        //
+        // 检查执行访问
 
         if ((MI_FAULT_STATUS_INDICATES_EXECUTION (FaultStatus)) &&
             (!MI_IS_PTE_EXECUTABLE (PointerPte))) {
@@ -611,12 +611,12 @@ Environment:
 
         TempPte = *PointerPte;
 
-        if (TempPte.u.Hard.Valid != 0) {
+        if (TempPte.u.Hard.Valid != 0) {   // PTE有效
 
             //
             // The PTE is already valid, this must be an access, dirty or
             // copy on write fault.
-            //
+            // 不合法的写
 
             if ((MI_FAULT_STATUS_INDICATES_WRITE (FaultStatus)) &&
                 ((TempPte.u.Long & MM_PTE_WRITE_MASK) == 0) &&
@@ -731,7 +731,7 @@ Environment:
             return STATUS_SUCCESS;
         }
 
-        if (TempPte.u.Soft.Prototype != 0) {
+        if (TempPte.u.Soft.Prototype != 0) { // PTE无效，原型位已置上
 
             if ((MmProtectFreedNonPagedPool == TRUE) &&
 
@@ -812,7 +812,7 @@ Environment:
         if ((MI_FAULT_STATUS_INDICATES_WRITE (FaultStatus)) &&
             (PointerProtoPte == NULL) &&
             (SessionAddress == FALSE) &&
-            (TempPte.u.Hard.Valid == 0)) {
+            (TempPte.u.Hard.Valid == 0)) {  // 处理正在转移的页面，若写权限不满足，则出错
 
             if (TempPte.u.Soft.Transition == 1) {
                 ProtectionCode = (ULONG) TempPte.u.Trans.Protection;
@@ -873,7 +873,7 @@ UserFault:
 
     //
     // FAULT IN USER SPACE OR PAGE DIRECTORY/PAGE TABLE PAGES.
-    //
+    // 用户地址空间或页表页面的页面错误
 
     Thread = PsGetCurrentThread ();
     CurrentProcess = PsGetCurrentProcessByThread (Thread);
@@ -919,7 +919,7 @@ UserFault:
     // Block APCs and acquire the working set mutex.  This prevents any
     // changes to the address space and it prevents valid PTEs from becoming
     // invalid.
-    //
+    // 针对3级或以上页表的处理器处理
 
     LOCK_WS (Thread, CurrentProcess);
 
@@ -1112,13 +1112,13 @@ UserFault:
     // If not, the page table page must be made valid first.
     //
 
-    if (PointerPde->u.Hard.Valid == 0) {
+    if (PointerPde->u.Hard.Valid == 0) {  // 处理无效PTE错误  
 
         //
         // If the PDE is zero, check to see if there is a virtual address
         // mapped at this location, and if so create the necessary
         // structures to map it.
-        //
+        // 是否为守护页面，否则将它变成一个要求零的PDE
 
         if ((PointerPde->u.Long == MM_ZERO_PTE) ||
             (PointerPde->u.Long == MM_ZERO_KERNEL_PTE)) {

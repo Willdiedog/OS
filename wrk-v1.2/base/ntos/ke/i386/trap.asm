@@ -3980,7 +3980,7 @@ Kt07140:
         jnz     _KiExceptionExit
 
         mov     ebx, [ebp]+TsEip        ; (ebx)->faulting instruction
-        mov     eax, STATUS_ACCESS_VIOLATION
+        mov     eax, STATUS_ACCESS_VIOLATION  ; ∑√Œ Œ•¿˝
         mov     esi, -1
         jmp     CommonDispatchException2Args0d ; Won't return
 
@@ -5641,7 +5641,7 @@ Kt0e9:
 ; test to see if reserved status code bit is set. If so, then bugchecka
 ;
 
-        cmp     eax, STATUS_IN_PAGE_ERROR or 10000000h
+        cmp     eax, STATUS_IN_PAGE_ERROR or 10000000h  ; “≥√Êªª»Î ß∞‹
         je      Kt0e12                  ; bugchecka
 
 ;

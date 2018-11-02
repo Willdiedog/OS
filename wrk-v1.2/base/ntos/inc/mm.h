@@ -382,7 +382,7 @@ extern BOOLEAN Mm64BitPhysicalAddress;
 // Mask for isolating secondary color from physical page number.
 //
 
-extern ULONG MmSecondaryColorMask;
+extern ULONG MmSecondaryColorMask;  // 63
 
 //
 // Section object type.

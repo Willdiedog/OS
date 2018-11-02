@@ -3405,7 +3405,7 @@ MiCompleteProtoPteFault (
 
 /*++
 
-Routine Description:
+Routine Description:  根据原型PTE生成实际PTE
 
     This routine completes a prototype PTE fault.  It is invoked
     after a read operation has completed bringing the data into
@@ -3623,7 +3623,7 @@ Environment:
     else if (Pfn1->u3.e1.CacheAttribute == MiWriteCombined) {
         Protection |= MM_WRITECOMBINE;
     }
-
+	// 填充PTE位
     if (FaultingAddress < MmSystemRangeStart) {
         MI_MAKE_VALID_USER_PTE (TempPte,
                                 PageFrameIndex,

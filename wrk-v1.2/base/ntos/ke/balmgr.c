@@ -366,7 +366,7 @@ Return Value:
     //
 
     KiSwappingThread = KeGetCurrentThread();
-    KeSetPriorityThread(KeGetCurrentThread(), LOW_REALTIME_PRIORITY + 7);
+    KeSetPriorityThread(KeGetCurrentThread(), LOW_REALTIME_PRIORITY + 7);  // 23
 
     //
     // Loop for ever processing swap events.
@@ -410,12 +410,12 @@ Return Value:
 
         SwapEntry = InterlockedFlushSingleList(&KiProcessOutSwapListHead);
         if (SwapEntry != NULL) {
-            KiOutSwapProcesses(SwapEntry);
+            KiOutSwapProcesses(SwapEntry);  // 检查KiProcessOutSwapListHead链表，执行进程换出
         }
 
         //
         // Check if there are any process in swap requests pending.
-        //
+        // 进程换入
 
         SwapEntry = InterlockedFlushSingleList(&KiProcessInSwapListHead);
         if (SwapEntry != NULL) {
@@ -680,7 +680,7 @@ Return Value:
     KiLockDispatcherDatabase(&OldIrql);
     NextEntry = Prcb->WaitListHead.Flink;
     while ((NextEntry != &Prcb->WaitListHead) &&
-           (NumberOfThreads < MAXIMUM_THREAD_STACKS)) {
+           (NumberOfThreads < MAXIMUM_THREAD_STACKS)) {  // 检查处理器上正在等待的线程  提取出MAXIMUM_THREAD_STACKS个线程
 
         Thread = CONTAINING_RECORD(NextEntry, KTHREAD, WaitListEntry);
 
@@ -722,7 +722,7 @@ Return Value:
             ASSERT(Process->State == ProcessInMemory);
 
             Process->StackCount -= 1;
-            if (Process->StackCount == 0) {
+            if (Process->StackCount == 0) {  // 线程被换出，该进程被放到进程换出链表中
                 Process->State = ProcessOutTransition;
                 InterlockedPushEntrySingleList(&KiProcessOutSwapListHead,
                                                &Process->SwapListEntry);
@@ -743,7 +743,7 @@ Return Value:
     // Increment the last processor number.
     //
 
-    KiLastProcessor += 1;
+    KiLastProcessor += 1; // 下次要检查的处理器编号
     if (KiLastProcessor == (ULONG)KeNumberProcessors) {
         KiLastProcessor = 0;
     }
@@ -825,7 +825,7 @@ Return Value:
 
             KiUnlockDispatcherDatabase(OldIrql);
 
-        } else {
+        } else { // 进程的就绪线程链表为空，将进程状态置于ProcessOutSwap
             Process->State = ProcessOutSwap;
             KiUnlockDispatcherDatabase(OldIrql);
             MmOutSwapProcess(Process);

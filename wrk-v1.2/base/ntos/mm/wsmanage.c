@@ -596,7 +596,7 @@ MmWorkingSetManager (
     VOID
     )
 
-/*++
+/*++  修剪进程或系统的工作集
 
 Routine Description:
 

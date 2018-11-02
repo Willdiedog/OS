@@ -2050,7 +2050,7 @@ MiRemoveZeroPage (
     IN ULONG Color
     )
 
-/*++
+/*++  
 
 Routine Description:
 
@@ -2359,7 +2359,7 @@ MiRemoveAnyPage (
 /*++
 
 Routine Description:
-
+    空闲链表---》  零化联保白哦----》  备用链表     获取页面
     This procedure removes a page from either the free, zeroed,
     or standby lists (in that order).  If no pages exist on the zeroed
     or free list a transition page is removed from the standby list

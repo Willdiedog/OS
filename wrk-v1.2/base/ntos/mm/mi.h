@@ -1654,12 +1654,12 @@ MI_SET_CACHETYPE_TRANSLATION(
 #define LargeSessionAllocation PrototypePte
 
 typedef struct _MMPFNENTRY {
-    USHORT Modified : 1;
-    USHORT ReadInProgress : 1;
-    USHORT WriteInProgress : 1;
-    USHORT PrototypePte: 1;
+    USHORT Modified : 1;       // 页面是否已被修改
+    USHORT ReadInProgress : 1; // 正在进行读操作
+    USHORT WriteInProgress : 1;// 正在进行写操作
+    USHORT PrototypePte: 1;    // 是否为原型PTE
     USHORT PageColor : 4;
-    USHORT PageLocation : 3;
+    USHORT PageLocation : 3;   // 当前页面状态
     USHORT RemovalRequested : 1;
 
     //
@@ -1710,7 +1710,7 @@ typedef struct _MMPFNENTRY {
 typedef struct _MMPFN {
     union {
         PFN_NUMBER Flink;
-        WSLE_NUMBER WsIndex;
+        WSLE_NUMBER WsIndex;  // 所属工作集链表中的索引
         PKEVENT Event;
         NTSTATUS ReadStatus;
 
@@ -1722,13 +1722,13 @@ typedef struct _MMPFN {
 
         SINGLE_LIST_ENTRY NextStackPfn;
     } u1;
-    PMMPTE PteAddress;
+    PMMPTE PteAddress;  // 指向此页面的PTE虚拟地址
     union {
         PFN_NUMBER Blink;
 
         //
         // ShareCount transitions are protected by the PFN lock.
-        //
+        // 指向该页面的PTE数量，对于页表页面，表示页表中有效PTE和转移PTE的数量
 
         ULONG_PTR ShareCount;
     } u2;
@@ -1754,7 +1754,7 @@ typedef struct _MMPFN {
     ULONG UsedPageTableEntries;
 #endif
     union {
-        MMPTE OriginalPte;
+        MMPTE OriginalPte;  // 指向此页面的PTE原始内容
         LONG AweReferenceCount;
     };
     union {
@@ -1779,9 +1779,9 @@ typedef struct _MMPFN {
 #pragma pack()
 #endif
 
-extern PMMPFN MmPfnDatabase;
+extern PMMPFN MmPfnDatabase;  // PFN数据库
 
-#define MI_PFN_ELEMENT(index) (&MmPfnDatabase[index])
+#define MI_PFN_ELEMENT(index) (&MmPfnDatabase[index])  // index为页帧编号
 
 //
 // No multiplier reciprocal needs to be inlined because the compiler (using Oxt)
@@ -7461,21 +7461,21 @@ Environment:
     return MI_CHECK_BIT (MiPfnBitMap.Buffer, PageFrameIndex);
 }
 
-extern MMPFNLIST MmZeroedPageListHead;
+extern MMPFNLIST MmZeroedPageListHead;  // 零化链表
 
-extern MMPFNLIST MmFreePageListHead;
+extern MMPFNLIST MmFreePageListHead;	// 空闲链表
 
-extern MMPFNLIST MmStandbyPageListHead;
+extern MMPFNLIST MmStandbyPageListHead;  // 备用链表
 
 extern MMPFNLIST MmStandbyPageListByPriority[MI_PFN_PRIORITIES];
 
 extern MMPFNLIST MmRomPageListHead;
 
-extern MMPFNLIST MmModifiedPageListHead;
+extern MMPFNLIST MmModifiedPageListHead;  // 修改链表
 
-extern MMPFNLIST MmModifiedNoWritePageListHead;
+extern MMPFNLIST MmModifiedNoWritePageListHead;  // 修改但不写出链表
 
-extern MMPFNLIST MmBadPageListHead;
+extern MMPFNLIST MmBadPageListHead;	// 坏页面链表
 
 extern PMMPFNLIST MmPageLocationList[NUMBER_OF_PAGE_LISTS];
 
@@ -7871,9 +7871,9 @@ extern MMPTE GlobalPte;
 // Page color for system working set.
 //
 
-extern ULONG MmSystemPageColor;
+extern ULONG MmSystemPageColor; 
 
-extern ULONG MmSecondaryColors;
+extern ULONG MmSecondaryColors; // 默认64   64中颜色
 
 extern ULONG MmProcessColorSeed;
 

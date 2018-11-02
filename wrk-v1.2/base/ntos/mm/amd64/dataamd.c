@@ -111,7 +111,7 @@ PVOID MmPagedPoolEnd;
 // Color tables for free and zeroed pages.
 //
 
-PMMCOLOR_TABLES MmFreePagesByColor[2];
+PMMCOLOR_TABLES MmFreePagesByColor[2];  // 0对应零化页面，1-对应空闲页面
 
 //
 // Color tables for modified pages destined for the paging file.

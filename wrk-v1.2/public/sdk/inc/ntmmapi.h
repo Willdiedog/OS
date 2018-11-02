@@ -308,7 +308,7 @@ typedef enum _SECTION_INHERIT {
 #define PAGE_NOACCESS          0x01     // winnt
 #define PAGE_READONLY          0x02     // winnt
 #define PAGE_READWRITE         0x04     // winnt
-#define PAGE_WRITECOPY         0x08     // winnt
+#define PAGE_WRITECOPY         0x08     // winnt  写时复制，如创建子进程，页表共享，都指向相同物理空间，在一进程写数据时，内存管理器复制一个页面，让两进程都有自己的私有可读写页面
 #define PAGE_EXECUTE           0x10     // winnt
 #define PAGE_EXECUTE_READ      0x20     // winnt
 #define PAGE_EXECUTE_READWRITE 0x40     // winnt

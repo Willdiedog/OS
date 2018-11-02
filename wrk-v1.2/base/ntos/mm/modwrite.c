@@ -2848,7 +2848,7 @@ MiModifiedPageWriter (
     IN PVOID StartContext
     )
 
-/*++
+/*++  修改页面 写出 器
 
 Routine Description:
 
@@ -2928,7 +2928,7 @@ Environment:
     // Make this a real time thread.
     //
 
-    KeSetPriorityThread (KeGetCurrentThread (), LOW_REALTIME_PRIORITY + 1);
+    KeSetPriorityThread (KeGetCurrentThread (), LOW_REALTIME_PRIORITY + 1); // 17 实时优先级
 
     //
     // Start a secondary thread for writing mapped file pages.  This
@@ -2950,7 +2950,7 @@ Environment:
                                    0L,
                                    NULL,
                                    MiMappedPageWriter,
-                                   NULL);
+                                   NULL);  // 创建系统线程
 
     if (!NT_SUCCESS(Status)) {
         KeBugCheckEx (MEMORY_MANAGEMENT,

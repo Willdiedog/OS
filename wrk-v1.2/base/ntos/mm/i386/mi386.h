@@ -2520,7 +2520,7 @@ typedef struct _MMPTE_HARDWARE {
     ULONG LargePage : 1;     // 大页面PDE
     ULONG Global : 1;        // 此PTE适用于所有进程
     ULONG CopyOnWrite : 1; // software field
-    ULONG Prototype : 1;   // software field
+    ULONG Prototype : 1;   // software field  原型PTE类型，此MMPTE_HARDWARE不参与地址转译，描述页面状态信息
 #if defined(NT_UP)
     ULONG reserved : 1;    // software field
 #else
