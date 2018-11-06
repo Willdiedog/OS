@@ -301,7 +301,7 @@ MiFillWsleHash (
     IN PMMWSL WorkingSetList
     )
 
-/*++
+/*++ 空表中插入工作集链表中页面信息
 
 Routine Description:
 
@@ -475,7 +475,7 @@ MiLocateWsle (
     IN LOGICAL Deletion
     )
 
-/*++
+/*++ 根据页面虚拟地址定位到工作集链表的描述项
 
 Routine Description:
 

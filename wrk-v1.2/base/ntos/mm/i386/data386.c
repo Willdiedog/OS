@@ -123,7 +123,7 @@ PVOID MmPagedPoolStart = (PVOID) MM_DEFAULT_PAGED_POOL_START;  // 换页内存池
 
 PVOID MmPagedPoolEnd;
 
-PMMWSL MmWorkingSetList;
+PMMWSL MmWorkingSetList;  // 内存工作集链表
 
 ULONG MiMaximumWorkingSet =
        ((ULONG)((ULONG)2*1024*1024*1024 - 64*1024) >> PAGE_SHIFT); //2Gb-64K.

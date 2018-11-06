@@ -657,7 +657,7 @@ Environment:
             MiDeferredUnlockPages (0);
         }
 
-        MiProcessWorkingSets (WorkingSetRequestFlags, &TrimCriteria);
+        MiProcessWorkingSets (WorkingSetRequestFlags, &TrimCriteria);  // 执行进程内存修剪或年龄刷新工作
     }
             
     //
@@ -681,7 +681,7 @@ MiComputeSystemTrimCriteria (
     IN PMMWS_TRIM_CRITERIA Criteria
     )
 
-/*++
+/*++ 确定是否需要启动修剪工作集或刷新工作集年龄的工作，以及如何安排被修剪的进程
 
 Routine Description:
 
@@ -1141,7 +1141,7 @@ Environment:
 
                 //
                 // Determine how many pages to trim from this working set.
-                //
+                // 确定是否需要修剪该进程工作集、修剪多老的页面、是否需要重新计算页面年龄、并返回可修剪页面的数量
     
                 Trim = MiDetermineTrimAmount (TrimCriteria, VmSupport);
     
@@ -1155,7 +1155,7 @@ Environment:
     
                     //
                     // We haven't reached our goal, so trim now.
-                    //
+                    // 进行修剪
     
                     Trim = MiTrimWorkingSet (Trim,
                                              VmSupport,
@@ -1174,7 +1174,7 @@ Environment:
                                  &TrimCriteria->NewTotalClaim,
                                  &TrimCriteria->NewTotalEstimatedAvailable);
             }
-            else if (WorkingSetRequestFlags & MI_AGE_ALL_WORKING_SETS) {
+            else if (WorkingSetRequestFlags & MI_AGE_ALL_WORKING_SETS) {  // 只更新页面年龄
                 MiAgeWorkingSet (VmSupport,
                                  TRUE,
                                  &WslesScanned,
@@ -1270,7 +1270,7 @@ MiDetermineTrimAmount (
 
 /*++
 
-Routine Description:
+Routine Description:  进程是否需要内存修剪
 
      Determine whether this process should be trimmed.
 

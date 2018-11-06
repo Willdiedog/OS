@@ -1710,7 +1710,7 @@ typedef struct _MMPFNENTRY {
 typedef struct _MMPFN {
     union {
         PFN_NUMBER Flink;
-        WSLE_NUMBER WsIndex;  // 所属工作集链表中的索引
+        WSLE_NUMBER WsIndex;  // 所属工作集链表中的索引  MMWSLE
         PKEVENT Event;
         NTSTATUS ReadStatus;
 
@@ -2924,9 +2924,9 @@ typedef enum _MMSHARE_TYPE {
 } MMSHARE_TYPE;
 
 typedef struct _MMWSLE_HASH {
-    PVOID Key;
+    PVOID Key;					// MI_WSLE_HASH(VirtualAddress, WorkingSetList)求得
     WSLE_NUMBER Index;
-} MMWSLE_HASH, *PMMWSLE_HASH;
+} MMWSLE_HASH, *PMMWSLE_HASH;  // 从页面虚拟地址到工作集链表数组索引的映射  线性开发定址法
 
 //++
 //
@@ -2973,13 +2973,13 @@ typedef struct _MMWSLENTRY {
 
     ULONG_PTR Protection : 5;
 
-    ULONG_PTR Hashed : 1;
-    ULONG_PTR Direct : 1;
-    ULONG_PTR Age : 2;
+    ULONG_PTR Hashed : 1; // 是否已被插入到散列表中
+    ULONG_PTR Direct : 1; // 直接映射 页面的PFN中的WsIndex直接指向此项的索引
+    ULONG_PTR Age : 2;  // 页面年龄
 #if MM_VIRTUAL_PAGE_FILLER
     ULONG_PTR Filler : MM_VIRTUAL_PAGE_FILLER;
 #endif
-    ULONG_PTR VirtualPageNumber : MM_VIRTUAL_PAGE_SIZE;
+    ULONG_PTR VirtualPageNumber : MM_VIRTUAL_PAGE_SIZE;  // 页面的虚拟地址
 } MMWSLENTRY;
 
 typedef struct _MMWSLE {
@@ -2988,7 +2988,7 @@ typedef struct _MMWSLE {
         ULONG_PTR Long;
         MMWSLENTRY e1;
     } u1;
-} MMWSLE;
+} MMWSLE; // 描述一个有效页面：低12位为MMWSLENTRY中定义的标志位，高20位为页面的虚拟地址
 
 //
 // Mask off everything but the VPN and the valid bit so the WSLE compare
@@ -3007,15 +3007,15 @@ typedef MMWSLE *PMMWSLE;
 //
 
 typedef struct _MMWSL {
-    WSLE_NUMBER FirstFree;
-    WSLE_NUMBER FirstDynamic;
-    WSLE_NUMBER LastEntry;
+    WSLE_NUMBER FirstFree;		// 空闲链表头 工
+    WSLE_NUMBER FirstDynamic;	// 第一个可被修剪的页面
+    WSLE_NUMBER LastEntry;		// 最后一个使用的项
     WSLE_NUMBER NextSlot;               // The next slot to trim
-    PMMWSLE Wsle;
+    PMMWSLE Wsle;						// 指向MMWSL对象的尾部
     WSLE_NUMBER LastInitializedWsle;
-    WSLE_NUMBER NonDirectCount;
+    WSLE_NUMBER NonDirectCount;	// 工作集链表中无直接映射的项的数量
     PMMWSLE_HASH HashTable;
-    ULONG HashTableSize;
+    ULONG HashTableSize;		// 散列表  加速WSLE的查找
     ULONG NumberOfCommittedPageTables;
     PVOID HashTableStart;
     PVOID HighestPermittedHashAddress;

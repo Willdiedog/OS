@@ -2388,7 +2388,7 @@ InterlockedExchangeAdd(
     __asm {
          mov     eax, Increment
          mov     ecx, Addend
-    lock xadd    [ecx], eax
+    lock xadd    [ecx], eax   ; xadd 交换并相加 结果放入[ecx]
     }
 }
 // end_wdm

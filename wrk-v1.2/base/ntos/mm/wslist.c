@@ -3292,7 +3292,7 @@ MiGrowWsleHash (
     IN PMMSUPPORT WsInfo
     )
 
-/*++
+/*++ 散列表扩展
 
 Routine Description:
 
@@ -3677,7 +3677,7 @@ MiFreeWsleList (
     IN PMMWSLE_FLUSH_LIST WsleFlushList
     )
 
-/*++
+/*++ 页面状态变为转移状态，并转移到备用链表或修改链表中
 
 Routine Description:
 
@@ -3989,7 +3989,7 @@ Environment:
         ASSERT (WorkingSetIndex >= WorkingSetList->FirstDynamic);
         ASSERT (Wsle[WorkingSetIndex].u1.e1.Valid == 1);
 
-        MiRemoveWsle (WorkingSetIndex, WorkingSetList);
+        MiRemoveWsle (WorkingSetIndex, WorkingSetList); // 从工作集链表中移除
 
         ASSERT (WorkingSetList->FirstFree >= WorkingSetList->FirstDynamic);
 
@@ -4129,7 +4129,7 @@ TrimMore:
     // See if the working set list can be contracted.
     //
     // Make sure we are at least a page above the working set maximum.
-    //
+    // 
 
     if (WorkingSetList->FirstDynamic == WsInfo->WorkingSetSize) {
         MiRemoveWorkingSetPages (WsInfo);

@@ -2311,7 +2311,7 @@ Environment:
         //
         // Initialize the low and high memory events.  This must be done
         // before starting the working set manager.
-        //
+        // 初始化内存事件
 
         if (MiInitializeMemoryEvents () == FALSE) {
             return FALSE;
@@ -4899,7 +4899,7 @@ MiInitializeMemoryEvents (
     // bother error checking them as they can't hurt the system regardless (bad
     // values just may result in events not getting signaled or staying
     // signaled when they shouldn't, but that's not fatal).
-    //
+    // 低内存事件
 
     if (MmLowMemoryThreshold != 0) {
         MmLowMemoryThreshold *= ((1024 * 1024) / PAGE_SIZE);
@@ -4938,7 +4938,7 @@ MiInitializeMemoryEvents (
         MmHighMemoryThreshold = MmLowMemoryThreshold;
     }
 
-    Status = MiCreateMemoryEvent (&LowMem, &MiLowMemoryEvent);
+    Status = MiCreateMemoryEvent (&LowMem, &MiLowMemoryEvent); // 低内存事件
 
     if (!NT_SUCCESS (Status)) {
 #if DBG
@@ -4948,7 +4948,7 @@ MiInitializeMemoryEvents (
         return FALSE;
     }
 
-    Status = MiCreateMemoryEvent (&HighMem, &MiHighMemoryEvent);
+    Status = MiCreateMemoryEvent (&HighMem, &MiHighMemoryEvent);  // 高内存事件
 
     if (!NT_SUCCESS (Status)) {
 #if DBG

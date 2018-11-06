@@ -270,7 +270,7 @@ Return Value:
 
             //
             // Execute the virtual memory working set manager.
-            //
+            // 执行工作集操作  每1s被触发一次or可用内存降到足够少时会触发
 
             MmWorkingSetManager();
 

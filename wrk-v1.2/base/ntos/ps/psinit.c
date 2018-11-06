@@ -112,7 +112,7 @@ const GENERIC_MAPPING PspJobMapping = {
 
 POBJECT_TYPE PsThreadType;
 POBJECT_TYPE PsProcessType;
-PEPROCESS PsInitialSystemProcess;  // System进程 ID=4
+PEPROCESS PsInitialSystemProcess;  // 系统工作集：System进程的工作集 ID=4  包括系统模块的映像区、换页内存池和系统缓存
 PVOID PsSystemDllDllBase;
 ULONG PspDefaultPagedLimit;
 ULONG PspDefaultNonPagedLimit;

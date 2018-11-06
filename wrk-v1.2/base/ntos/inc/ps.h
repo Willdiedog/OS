@@ -64,7 +64,7 @@ typedef struct _MMSUPPORT_FLAGS {
 typedef ULONG WSLE_NUMBER, *PWSLE_NUMBER;
 
 typedef struct _MMSUPPORT {
-    LIST_ENTRY WorkingSetExpansionLinks;
+    LIST_ENTRY WorkingSetExpansionLinks;   // 表头MmWorkingSetExpansionHead
     LARGE_INTEGER LastTrimTime;
 
     MMSUPPORT_FLAGS Flags;
@@ -389,7 +389,7 @@ typedef struct _EPROCESS {
 
     SE_AUDIT_PROCESS_CREATION_INFO SeAuditProcessCreationInfo; //  包含创建进程时，指定的进程映像全路径名
 
-    MMSUPPORT Vm;  // 虚拟内存支持
+    MMSUPPORT Vm;  // 虚拟内存支持  包含工作集管理器在判断是否需要修剪一个进程的信息
 
 #if !defined(_WIN64)
     LIST_ENTRY MmProcessLinks;  // 有自己地址空间的进程链表  表头：MmProcessList   用于全局内存管理

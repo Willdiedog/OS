@@ -27,7 +27,7 @@ extern SIZE_T MmProcessCommit;
 
 BOOLEAN
 MmCreateProcessAddressSpace (
-    IN ULONG MinimumWorkingSetSize,   // 最小工作集大小
+    IN ULONG MinimumWorkingSetSize,   // 内存工作集最小值 
     IN PEPROCESS NewProcess,          // 进程对象
     OUT PULONG_PTR DirectoryTableBase // 页目录地址
     )
