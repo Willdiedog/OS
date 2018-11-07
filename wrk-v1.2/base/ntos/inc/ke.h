@@ -748,27 +748,27 @@ BOOLEAN
 // end_ntddk end_wdm end_ntifs end_ntosp
 
 //
-// Interrupt object
+// Interrupt object  中断对象
 //
 
 typedef struct _KINTERRUPT {
     CSHORT Type;
     CSHORT Size;
-    LIST_ENTRY InterruptListEntry;
-    PKSERVICE_ROUTINE ServiceRoutine;
+    LIST_ENTRY InterruptListEntry; // 同一中断向量关联的中断对象构成一个双链表 
+    PKSERVICE_ROUTINE ServiceRoutine;  // 中断服务例程
     PVOID ServiceContext;
     KSPIN_LOCK SpinLock;
     ULONG TickCount;
     PKSPIN_LOCK ActualLock;
     PKINTERRUPT_ROUTINE DispatchAddress;
-    ULONG Vector;
-    KIRQL Irql;
+    ULONG Vector; //中断对象的向量编号
+    KIRQL Irql;   // 该中断处理例程执行时的IRQL
     KIRQL SynchronizeIrql;
     BOOLEAN FloatingSave;
     BOOLEAN Connected;
     CCHAR Number;
     BOOLEAN ShareVector;
-    KINTERRUPT_MODE Mode;
+    KINTERRUPT_MODE Mode;	// 中断对象的模式  LevelSensitive（中断请求信号出现时，中断发生）或Lathed（中断请求信号由无信号到有信号发生变化是，中断发生）
     ULONG ServiceCount;
     ULONG DispatchCount;
 
@@ -780,7 +780,7 @@ typedef struct _KINTERRUPT {
 
 #else
 
-    ULONG DispatchCode[DISPATCH_LENGTH];
+    ULONG DispatchCode[DISPATCH_LENGTH];  // 基本的中断处理代码（汇编）
 
 #endif
 

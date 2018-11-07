@@ -155,19 +155,19 @@ extern PULONG KiInterruptTemplate2ndDispatch;
 // begin_ntddk begin_wdm begin_nthal begin_ntosp
 //
 // Interrupt Request Level definitions
-//
+// 中断请求级别
 
-#define PASSIVE_LEVEL 0             // Passive release level
+#define PASSIVE_LEVEL 0             // Passive release level  最低级别  所有用户模式代码都运行在此IRQL
 #define LOW_LEVEL 0                 // Lowest interrupt level
-#define APC_LEVEL 1                 // APC interrupt level
-#define DISPATCH_LEVEL 2            // Dispatcher level
-
-#define PROFILE_LEVEL 27            // timer used for profiling.
-#define CLOCK1_LEVEL 28             // Interval clock 1 level - Not used on x86
+#define APC_LEVEL 1                 // APC interrupt level  
+#define DISPATCH_LEVEL 2            // Dispatcher level  // 代表线程调度器正在运行  最高级别的软件中断
+// 3-26 为设备IRQL  HAL   DIRL
+#define PROFILE_LEVEL 27            // timer used for profiling.  // 性能剖析定时器
+#define CLOCK1_LEVEL 28             // Interval clock 1 level - Not used on x86 // 系统时钟中断
 #define CLOCK2_LEVEL 28             // Interval clock 2 level
-#define IPI_LEVEL 29                // Interprocessor interrupt level
-#define POWER_LEVEL 30              // Power failure level
-#define HIGH_LEVEL 31               // Highest interrupt level
+#define IPI_LEVEL 29                // Interprocessor interrupt level  处理器间通信的中断级别
+#define POWER_LEVEL 30              // Power failure level  电源失效
+#define HIGH_LEVEL 31               // Highest interrupt level 
 
 // end_ntddk end_wdm end_ntosp
 

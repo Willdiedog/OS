@@ -34,7 +34,7 @@ KeInitializeInterrupt (
     __in BOOLEAN FloatingSave
     )
 
-/*++
+/*++  初始化内核中断对象
 
 Routine Description:
 
