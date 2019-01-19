@@ -159,8 +159,8 @@ extern PULONG KiInterruptTemplate2ndDispatch;
 
 #define PASSIVE_LEVEL 0             // Passive release level  最低级别  所有用户模式代码都运行在此IRQL
 #define LOW_LEVEL 0                 // Lowest interrupt level
-#define APC_LEVEL 1                 // APC interrupt level  
-#define DISPATCH_LEVEL 2            // Dispatcher level  // 代表线程调度器正在运行  最高级别的软件中断
+#define APC_LEVEL 1                 // APC interrupt level     异步程序调用   线程调度   
+#define DISPATCH_LEVEL 2            // Dispatcher level  // 代表线程调度器正在运行  最高级别的软件中断   DPC(延时调用过程)运行在此等级上   用于驱动程序低IRQL状态下的I/O  定时器  时限结束处理器  电源失败修复等
 // 3-26 为设备IRQL  HAL   DIRL
 #define PROFILE_LEVEL 27            // timer used for profiling.  // 性能剖析定时器
 #define CLOCK1_LEVEL 28             // Interval clock 1 level - Not used on x86 // 系统时钟中断
@@ -1223,9 +1223,9 @@ typedef struct _KPRCB {
 
 //
 // DPC listhead, counts, and batching parameters - 64-byte aligned.
-//
+// 
 
-    KDPC_DATA DpcData[2];
+    KDPC_DATA DpcData[2]; // 0-在普通线程上运行的DPC链表   1-在专门DPC线程上运行的DPC链表
     PVOID DpcStack;
     ULONG MaximumDpcQueueDepth;
     ULONG DpcRequestRate;

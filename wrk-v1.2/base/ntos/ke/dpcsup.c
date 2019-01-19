@@ -49,7 +49,7 @@ KiExecuteDpc (
     IN PVOID Context
     )
 
-/*++
+/*++  此函数在每个处理器上的DPC线程中运行  
 
 Routine Description:
 

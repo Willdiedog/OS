@@ -315,9 +315,9 @@ typedef enum _KOBJECTS {
     MutantObject = 2,
     ProcessObject = 3,
     QueueObject = 4,
-    SemaphoreObject = 5,
-    ThreadObject = 6,
-    GateObject = 7,
+    SemaphoreObject = 5, // 信号量对象
+    ThreadObject = 6, // 线程对象
+    GateObject = 7, // 门对象
     TimerNotificationObject = 8,
     TimerSynchronizationObject = 9,
     Spare2Object = 10,
@@ -328,8 +328,8 @@ typedef enum _KOBJECTS {
     Spare7Object = 15,
     Spare8Object = 16,
     Spare9Object = 17,
-    ApcObject,
-    DpcObject,
+    ApcObject,  // 异步程序调用对象
+    DpcObject,	// 
     DeviceQueueObject,
     EventPairObject,
     InterruptObject,

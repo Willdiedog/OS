@@ -109,7 +109,7 @@ Return Value:
                                           NULL,
                                           NULL,
                                           KiExecuteDpc,
-                                          Prcb);
+                                          Prcb);   // 为每个处理器创建DPC线程
 
             if (!NT_SUCCESS(Status)) {
                 return FALSE;

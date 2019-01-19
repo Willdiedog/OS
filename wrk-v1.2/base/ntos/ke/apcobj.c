@@ -8,7 +8,7 @@ If you do not agree to the terms, do not use the code.
 
 Module Name:
 
-    apcobj.c
+    apcobj.c  异步程序调用对象(APC Object), 包括对象的初始化，刷新，插入和移除
 
 Abstract:
 
