@@ -302,16 +302,16 @@ typedef enum _KDPC_IMPORTANCE {
            ((Object)->Type == ThreadedDpcObject))
 
 typedef struct _KDPC {
-    UCHAR Type;
-    UCHAR Importance;
-    UCHAR Number;
-    UCHAR Expedite;
-    LIST_ENTRY DpcListEntry;
-    PKDEFERRED_ROUTINE DeferredRoutine;
+    UCHAR Type;         // DPC类型  DpcObject 或 ThreadedDpcObject
+    UCHAR Importance;	// 低插入DPC链表尾部) 中 高(插入DPC链表头部)
+    UCHAR Number;		// 插入到那个处理器的DPC链表中      MAXIMUM_PROCESSORS + 目标处理器编号
+    UCHAR Expedite;		// 保留值
+    LIST_ENTRY DpcListEntry;  // 链表节点对象
+    PKDEFERRED_ROUTINE DeferredRoutine;  // 要进行的延迟操作
     PVOID DeferredContext;
-    PVOID SystemArgument1;
-    PVOID SystemArgument2;
-    PVOID DpcData;
+    PVOID SystemArgument1;  // DeferredRoutine函数参数1
+    PVOID SystemArgument2;  // DeferredRoutine函数参数2
+    PVOID DpcData;  // 记录被插入哪个DPC链表中
 } KDPC, *PKDPC, *PRKDPC;
 
 //
